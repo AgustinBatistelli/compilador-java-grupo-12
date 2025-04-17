@@ -54,6 +54,8 @@ Init = "init"
 Float = "Float"
 Int = "Int"
 String = "String"
+If = "if"
+Else = "else"
 While = "while"
 Write = "write"
 
@@ -71,6 +73,8 @@ StringLiteral = \"([^\"\\]|\\.)*\"
   "Float" { return symbol(ParserSym.FLOAT); }
   "Int" { return symbol(ParserSym.INT); }
   "String" { return symbol(ParserSym.STRING); }
+  "if" { return symbol(ParserSym.IF); }
+  "else" { return symbol(ParserSym.ELSE); }
   "while" { return symbol(ParserSym.WHILE); }
   "write" { return symbol(ParserSym.WRITE); }
 
