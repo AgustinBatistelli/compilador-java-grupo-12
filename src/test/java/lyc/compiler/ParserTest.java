@@ -26,7 +26,7 @@ public class ParserTest {
     @Test
     public void syntaxError() {
         compilationError("1234");
-    }
+    }  // done
 
     @Test
     void arithmetic() throws Exception {
@@ -44,7 +44,7 @@ public class ParserTest {
     }
 
     @Test
-    void read() throws Exception {
+    void read() throws Exception { // done
         compilationSuccessful(readFromFile("read.txt"));
     }
 
@@ -60,7 +60,7 @@ public class ParserTest {
 
     @Test
     void and() throws Exception {
-        compilationSuccessful(readFromFile("and.txt"));
+        compilationSuccessful(readFromFile("and.txt")); // done
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ParserTest {
 
     @Test
     void not() throws Exception {
-        compilationSuccessful(readFromFile("not.txt"));
+        compilationSuccessful(readFromFile("not.txt")); // done
     }
 
     @Test
@@ -80,7 +80,7 @@ public class ParserTest {
 
     @Test
     void whileStatement() throws Exception {
-        compilationSuccessful(readFromFile("while.txt"));
+        compilationSuccessful(readFromFile("while.txt")); // done
     }
 
 

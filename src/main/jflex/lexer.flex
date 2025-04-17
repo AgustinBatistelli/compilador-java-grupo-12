@@ -57,8 +57,11 @@ String = "String"
 If = "if"
 Else = "else"
 While = "while"
+Read = "read"
 Write = "write"
 OR = "OR"
+AND = "AND"
+NOT = "NOT"
 
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
@@ -77,8 +80,11 @@ StringLiteral = \"([^\"\\]|\\.)*\"
   "if" { return symbol(ParserSym.IF); }
   "else" { return symbol(ParserSym.ELSE); }
   "while" { return symbol(ParserSym.WHILE); }
+  "read" { return symbol(ParserSym.READ); }
   "write" { return symbol(ParserSym.WRITE); }
   "OR" { return symbol(ParserSym.OR); }
+  "AND" { return symbol(ParserSym.AND); }
+  "NOT" { return symbol(ParserSym.NOT); }
 
   /* start comment */
   "#+" { yybegin(COMMENT); }

@@ -21,6 +21,7 @@ terminal LESS_THAN;
 terminal IF;
 terminal ELSE;
 terminal WHILE;
+terminal READ;
 terminal WRITE;
 terminal STRING_LITERAL;
 terminal INTEGER_CONSTANT;
@@ -34,6 +35,8 @@ terminal COLON;
 terminal COMMA;
 terminal COMMENT;
 terminal OR;
+terminal AND;
+terminal NOT;
 
 // Non Terminals
 non terminal program;
@@ -43,6 +46,7 @@ non terminal assignment;
 non terminal if_stmt;
 non terminal while_loop;
 non terminal write_stmt;
+non terminal read_stmt;
 non terminal expression;
 non terminal comparison;
 non terminal term;
@@ -67,6 +71,7 @@ sentence ::= assignment;
 sentence ::= if_stmt;
 sentence ::= write_stmt;
 sentence ::= while_loop;
+sentence ::= read_stmt;
 
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
@@ -79,13 +84,26 @@ if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_
 if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE ELSE OPEN_BRACE sentences CLOSE_BRACE
             {: System.out.println("If-Else statement parsed"); :};
 
-write_stmt ::= WRITE OPEN_BRACKET STRING_LITERAL CLOSE_BRACKET
-             {: System.out.println("Write string"); :};
+write_stmt ::= WRITE OPEN_BRACKET STRING_LITERAL:str CLOSE_BRACKET
+             {:
+                System.out.println("Write statement with string literal: " + str);
+                RESULT = "write(" + str + ")";
+             :};
 
-// WHILE
+write_stmt ::= WRITE OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
+            {:
+                System.out.println("Write statement with identifier: " + id);
+                RESULT = "write(" + id + ")";
+            :};
+
 while_loop ::= WHILE OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
              {: System.out.println("While with condition"); :};
 
+read_stmt ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
+            {:
+                System.out.println("Read statement with variable: "+ id);
+                RESULT = "read(" + id + ")";
+            :};
 
 
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
@@ -123,6 +141,23 @@ comparison ::= expression:exp1 EQUALS expression:exp2 {:
     RESULT = exp1 + " == " + exp2;
 :};
 
+// Comparison with and
+comparison ::= comparison:comp AND expression:exp1 GREATER_THAN expression:exp2 {:
+    System.out.println("Comparison " + comp + " AND " + exp1 + " > " + exp2);
+    RESULT = comp + " AND " + exp1 + " > " + exp2;
+:};
+
+comparison ::= comparison:comp AND expression:exp1 LESS_THAN expression:exp2 {:
+    System.out.println("Comparison " + comp + " AND " + exp1 + " < " + exp2);
+    RESULT = comp + " AND " + exp1 + " < " + exp2;
+:};
+
+comparison ::= comparison:comp AND expression:exp1 EQUALS expression:exp2 {:
+    System.out.println("Comparison " + comp + " AND " + exp1 + " = " + exp2);
+    RESULT = comp + " AND " + exp1 + " = " + exp2;
+:};
+
+// Comparison with or
 comparison ::= comparison:comp OR expression:exp1 GREATER_THAN expression:exp2 {:
     System.out.println("Comparison " + comp + " OR " + exp1 + " > " + exp2);
     RESULT = comp + " OR " + exp1 + " > " + exp2;
@@ -136,6 +171,22 @@ comparison ::= comparison:comp OR expression:exp1 LESS_THAN expression:exp2 {:
 comparison ::= comparison:comp OR expression:exp1 EQUALS expression:exp2 {:
     System.out.println("Comparison " + comp + " OR " + exp1 + " = " + exp2);
     RESULT = comp + " OR " + exp1 + " = " + exp2;
+:};
+
+// Comparison with NOT
+comparison ::= NOT expression:exp1 GREATER_THAN expression:exp2 {:
+    System.out.println("Comparison NOT " + exp1 + " > " + exp2);
+    RESULT = "NOT " + exp1 + " > " + exp2;
+:};
+
+comparison ::= NOT expression:exp1 LESS_THAN expression:exp2 {:
+    System.out.println("Comparison NOT " + exp1 + " < " + exp2);
+    RESULT = "NOT " + exp1 + " < " + exp2;
+:};
+
+comparison ::= NOT expression:exp1 EQUALS expression:exp2 {:
+    System.out.println("Comparison NOT " + exp1 + " = " + exp2);
+    RESULT = "NOT " + exp1 + " = " + exp2;
 :};
 
 comparison ::= expression:exp1 {:
