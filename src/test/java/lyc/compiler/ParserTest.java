@@ -45,7 +45,7 @@ public class ParserTest {
 
     @Test
     void read() throws Exception { // done
-        compilationSuccessful(readFromFile("read.txt"));
+        compilationSuccessful(readFromFile("read.txt")); // done
     }
 
     @Test

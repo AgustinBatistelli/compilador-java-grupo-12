@@ -28,7 +28,7 @@ terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
 terminal ASSIGNATION;
 terminal INIT;
-terminal FLOAT;
+terminal FLOAT_TYPE;
 terminal INT;
 terminal STRING;
 terminal COLON;
@@ -37,6 +37,7 @@ terminal COMMENT;
 terminal OR;
 terminal AND;
 terminal NOT;
+terminal FLOAT;
 
 // Non Terminals
 non terminal program;
@@ -122,7 +123,7 @@ identifier_list ::= identifier_list:list COMMA IDENTIFIER:id {:
                        RESULT = list + ", " + id;
                   :};
 
-type ::= FLOAT {: System.out.println("Float"); RESULT = "float"; :}
+type ::= FLOAT_TYPE {: System.out.println("Float"); RESULT = "float"; :}
       | INT {: System.out.println("Int"); RESULT = "int"; :}
       | STRING {: System.out.println("String"); RESULT = "string"; :};
 
@@ -205,3 +206,5 @@ term ::= factor
 factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
 factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); RESULT = constant; :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+factor ::= FLOAT:f {: System.out.println("Float constant: " + f); RESULT = f; :};
+factor ::= STRING_LITERAL:str {: System.out.println("String literal: " + str); RESULT = str; :};

@@ -51,7 +51,7 @@ Letter = [a-zA-Z]
 Digit = [0-9]
 
 Init = "init"
-Float = "Float"
+FloatType = "Float"
 Int = "Int"
 String = "String"
 If = "if"
@@ -65,8 +65,10 @@ NOT = "NOT"
 
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
+Float = (Digit+\.Digit*)|(\.Digit+)
 IntegerConstant = {Digit}+
 StringLiteral = \"([^\"\\]|\\.)*\"
+
 
 %%
 
@@ -74,7 +76,7 @@ StringLiteral = \"([^\"\\]|\\.)*\"
 <YYINITIAL> {
   /* reserved words */
   "init" { return symbol(ParserSym.INIT); }
-  "Float" { return symbol(ParserSym.FLOAT); }
+  "Float" { return symbol(ParserSym.FLOAT_TYPE); }
   "Int" { return symbol(ParserSym.INT); }
   "String" { return symbol(ParserSym.STRING); }
   "if" { return symbol(ParserSym.IF); }
@@ -91,6 +93,9 @@ StringLiteral = \"([^\"\\]|\\.)*\"
 
   /* string literal */
   {StringLiteral} { return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length()-1)); }
+
+  /* float */
+  {Float}              { return new Symbol(ParserSym.FLOAT, yytext()); }
 
   /* identifiers */
   {Identifier} { return symbol(ParserSym.IDENTIFIER, yytext()); }
