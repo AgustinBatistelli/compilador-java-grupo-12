@@ -30,6 +30,7 @@ terminal INT;
 terminal STRING;
 terminal COLON;
 terminal COMMA;
+terminal COMMENT;
 
 // Non Terminals
 non terminal program;
@@ -49,9 +50,10 @@ non terminal identifier_list;
 non terminal type;
 
 // Start Symbol Definition
-start with sentence;
+start with program;
 
-program ::= sentences;
+program ::= sentences
+          | COMMENT program;
 
 sentences ::= sentence sentences
            | ;
@@ -72,8 +74,7 @@ while_loop ::= WHILE OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences 
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
 
-variable_declaration_list ::= variable_declaration variable_declaration_list
-                            | ;
+variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
 
 variable_declaration ::= identifier_list:list COLON type:type
                        {:

@@ -14,6 +14,7 @@ import static lyc.compiler.constants.Constants.*;
 %line
 %column
 %throws CompilerException
+%state COMMENT
 %eofval{
   return symbol(ParserSym.EOF);
 %eofval}
@@ -73,6 +74,9 @@ StringLiteral = \"([^\"\\]|\\.)*\"
   "while" { return symbol(ParserSym.WHILE); }
   "write" { return symbol(ParserSym.WRITE); }
 
+  /* start comment */
+  "#+" { yybegin(COMMENT); }
+
   /* string literal */
   {StringLiteral} { return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length()-1)); }
 
@@ -101,6 +105,14 @@ StringLiteral = \"([^\"\\]|\\.)*\"
 
   /* whitespace */
   {WhiteSpace} { /* ignore */ }
+}
+
+/* comment */
+<COMMENT> {
+  [^#\n]+ { /*  ignore comment content  */ }
+  "#" { /* ignore # loose  */ }
+  \n { /* ignore line breaks */ }
+  "\+#" { yybegin(YYINITIAL); return symbol(ParserSym.COMMENT); } /* end of comment */
 }
 
 %%
