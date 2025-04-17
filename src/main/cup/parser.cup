@@ -13,27 +13,98 @@ terminal MULT;
 terminal DIV;
 terminal OPEN_BRACKET;
 terminal CLOSE_BRACKET;
+terminal OPEN_BRACE;
+terminal CLOSE_BRACE;
+terminal EQUALS;
+terminal GREATER_THAN;
+terminal LESS_THAN;
+terminal WHILE;
+terminal WRITE;
+terminal STRING_LITERAL;
 terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
+terminal ASSIGNATION;
+terminal INIT;
+terminal FLOAT;
+terminal INT;
+terminal STRING;
+terminal COLON;
+terminal COMMA;
 
 // Non Terminals
+non terminal program;
 non terminal sentence;
+non terminal sentences;
 non terminal assignment;
+non terminal while_loop;
+non terminal write_stmt;
 non terminal expression;
+non terminal comparison;
 non terminal term;
 non terminal factor;
+non terminal init_block;
+non terminal variable_declaration;
+non terminal variable_declaration_list;
+non terminal identifier_list;
+non terminal type;
 
 // Start Symbol Definition
 start with sentence;
 
-sentence ::= assignment {: System.out.println("End"); :};
-assignment ::= IDENTIFIER ASSIG expression {: System.out.println("Assignment"); :};
-expression ::= expression PLUS term {: System.out.println("+"); :};
-expression ::= expression SUB term {: System.out.println("-"); :};
-expression ::= term {: System.out.println("Expression = Term"); :};
-term ::= term MULT factor {: System.out.println("*"); :};
-term ::= term DIV factor {: System.out.println("/"); :};
-term ::= factor {: System.out.println("Term = factor"); :};
-factor ::= IDENTIFIER:id  {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant ); :};
+program ::= sentences;
+
+sentences ::= sentence sentences
+           | ;
+
+sentence ::= assignment  {: System.out.println("Assignment"); :};
+sentence ::= while_loop  {: System.out.println("While loop"); :};
+sentence ::= write_stmt  {: System.out.println("Write statement"); :};
+sentence ::= init_block  {: System.out.println("Init block"); :};
+
+assignment ::= IDENTIFIER ASSIGNATION expression {: System.out.println("Assignment"); :};
+
+write_stmt ::= WRITE OPEN_BRACKET STRING_LITERAL CLOSE_BRACKET
+             {: System.out.println("Write string"); :};
+
+while_loop ::= WHILE OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
+             {: System.out.println("While with condition"); :};
+
+init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
+             {: System.out.println("Initialization block"); :};
+
+variable_declaration_list ::= variable_declaration variable_declaration_list
+                            | ;
+
+variable_declaration ::= identifier_list:list COLON type:type
+                       {:
+                            System.out.println("Variable declaration: " + list + " of type " + type);
+                       :};
+
+identifier_list ::= IDENTIFIER:id {:
+                        System.out.println("Id: " + id);
+                        RESULT = id;
+                   :};
+identifier_list ::= identifier_list:list COMMA IDENTIFIER:id {:
+                       System.out.println("List: " + list + ", ID: " + id);
+                       RESULT = list + ", " + id;
+                  :};
+
+type ::= FLOAT {: System.out.println("Float"); RESULT = "float"; :}
+      | INT {: System.out.println("Int"); RESULT = "int"; :}
+      | STRING {: System.out.println("String"); RESULT = "string"; :};
+
+comparison ::= expression GREATER_THAN expression {: System.out.println("Comparison >"); :};
+comparison ::= expression LESS_THAN expression {: System.out.println("Comparison <"); :};
+comparison ::= expression EQUALS expression {: System.out.println("Comparison ="); :};
+
+expression ::= term
+            | expression PLUS term {: System.out.println("+"); :}
+            | expression SUB term {: System.out.println("-"); :};
+
+term ::= factor
+      | term MULT factor {: System.out.println("*"); :}
+      | term DIV factor {: System.out.println("/"); :};
+
+factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); :};
+factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};

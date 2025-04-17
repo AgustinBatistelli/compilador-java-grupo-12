@@ -29,6 +29,11 @@ public class ParserTest {
     }
 
     @Test
+    void arithmetic() throws Exception {
+        compilationSuccessful(readFromFile("arithmetic.txt"));
+    }
+
+    @Test
     void assignments() throws Exception {
         compilationSuccessful(readFromFile("assignments.txt"));
     }
