@@ -18,7 +18,6 @@ import static lyc.compiler.constants.Constants.*;
 %eofval{
   return symbol(ParserSym.EOF);
 %eofval}
-
 %{
   private Symbol symbol(int type) {
     return new Symbol(type, yyline, yycolumn);
@@ -26,39 +25,49 @@ import static lyc.compiler.constants.Constants.*;
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline, yycolumn, value);
   }
+
+  private static final int MAX_STRING_LENGTH = 50;
+  private static final int MAX_IDENTIFIER_LENGTH = 50;
 %}
 
 LineTerminator = \r|\n|\r\n
 InputCharacter = [^\r\n]
 Identation =  [ \t\f]
 
+// Operators:
 Plus = "+"
 Mult = "*"
 Sub = "-"
 Div = "/"
 Assig = "="
 Assignation = ":="
+Equals = "=="
+GreaterThan = ">"
+LessThan = "<"
+
+// Symbols
 OpenBrace = "{"
 CloseBrace = "}"
 OpenBracket = "("
 CloseBracket = ")"
 Colon = ":"
 Comma  = ","
-Equals = "=="
-GreaterThan = ">"
-LessThan = "<"
+
 Letter = [a-zA-Z]
 Digit = [0-9]
 
+// Reserved Words
 Init = "init"
-FloatType = "Float"
 Int = "Int"
+FloatType = "Float"
 String = "String"
 If = "if"
 Else = "else"
 While = "while"
 Read = "read"
 Write = "write"
+
+// Logic Operators
 OR = "OR"
 AND = "AND"
 NOT = "NOT"
@@ -66,9 +75,11 @@ NOT = "NOT"
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 Float = (Digit+\.Digit*)|(\.Digit+)
+//IntegerConstant = ("-"?{Digit}+)
 IntegerConstant = {Digit}+
-StringLiteral = \"([^\"\\]|\\.)*\"
 
+
+StringLiteral = \"([^\"\\]|\\.)*\"
 
 %%
 
@@ -88,43 +99,76 @@ StringLiteral = \"([^\"\\]|\\.)*\"
   "AND" { return symbol(ParserSym.AND); }
   "NOT" { return symbol(ParserSym.NOT); }
 
-  /* start comment */
-  "#+" { yybegin(COMMENT); }
+  /* start comment:  #+ ... +# */
+   "#+" { yybegin(COMMENT); }
 
+   /* start comment: /* ... */ */
+   "/*" ([^*] | \*+[^*/])* \*+ "/" { /* ignore C-style comment */ }
+
+   /* operators */
+    {Equals} {return symbol(ParserSym.EQUALS); }
+    {Plus} { return symbol(ParserSym.PLUS); }
+    {Sub} { return symbol(ParserSym.SUB); }
+    {Mult} { return symbol(ParserSym.MULT); }
+    {Div} { return symbol(ParserSym.DIV); }
+    {Assignation} { return symbol(ParserSym.ASSIGNATION); }
+    {Assig} { return symbol(ParserSym.ASSIG); }
+    {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
+    {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
+    {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
+    {LessThan} { return symbol(ParserSym.LESS_THAN); }
+    {OpenBrace} { return symbol(ParserSym.OPEN_BRACE); }
+    {CloseBrace} { return symbol(ParserSym.CLOSE_BRACE); }
+    {Colon} { return symbol(ParserSym.COLON); }
+    {Comma} { return symbol(ParserSym.COMMA); }
+
+   /* Constants */
+  {IntegerConstant} {
+      try {
+          long value;
+          String text = yytext();
+
+          if (text.startsWith("-")) {
+              value = Long.parseLong(text.substring(1));
+              if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                  throw new InvalidIntegerException(yytext());
+              }
+          } else {
+              value = Long.parseLong(text);
+              if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                  throw new InvalidIntegerException(yytext());
+              }
+          }
+      } catch (NumberFormatException e) {
+          throw new InvalidIntegerException(yytext());
+      }
+      return symbol(ParserSym.INTEGER_CONSTANT, yytext());
+  }
   /* string literal */
-  {StringLiteral} { return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length()-1)); }
+   {StringLiteral} {
+     if (yytext().length() - 2 > MAX_STRING_LENGTH) {
+       throw new InvalidLengthException("StringLiteral too long");
+     }
+     return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length()-1));
+   }
 
-  /* float */
-  {Float}              { return new Symbol(ParserSym.FLOAT, yytext()); }
+   /* float */
+   {Float} { return new Symbol(ParserSym.FLOAT, yytext()); }
 
-  /* identifiers */
-  {Identifier} { return symbol(ParserSym.IDENTIFIER, yytext()); }
-
-  /* Constants */
-  {IntegerConstant} { return symbol(ParserSym.INTEGER_CONSTANT, yytext()); }
-
-  /* operators */
-  {Equals} {return symbol(ParserSym.EQUALS); }
-  {Plus} { return symbol(ParserSym.PLUS); }
-  {Sub} { return symbol(ParserSym.SUB); }
-  {Mult} { return symbol(ParserSym.MULT); }
-  {Div} { return symbol(ParserSym.DIV); }
-  {Assignation} { return symbol(ParserSym.ASSIGNATION); }
-  {Assig} { return symbol(ParserSym.ASSIG); }
-  {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
-  {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
-  {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
-  {LessThan} { return symbol(ParserSym.LESS_THAN); }
-  {OpenBrace} { return symbol(ParserSym.OPEN_BRACE); }
-  {CloseBrace} { return symbol(ParserSym.CLOSE_BRACE); }
-  {Colon} { return symbol(ParserSym.COLON); }
-  {Comma} { return symbol(ParserSym.COMMA); }
+   /* identifiers */
+   {Identifier} {
+     if (yytext().length() > MAX_IDENTIFIER_LENGTH) {
+       throw new InvalidLengthException("Identifier too long");
+     }
+     return symbol(ParserSym.IDENTIFIER, yytext());
+   }
 
   /* whitespace */
   {WhiteSpace} { /* ignore */ }
 }
 
 /* comment */
+"/*" ([^*] | \*+[^*/])* \*+ "/" { /* ignore C-style comment */ }
 <COMMENT> {
   [^#\n]+ { /*  ignore comment content  */ }
   "#" { /* ignore # loose  */ }
@@ -136,3 +180,6 @@ StringLiteral = \"([^\"\\]|\\.)*\"
 
 /* error fallback */
 [^\r\n]+  { throw new UnknownCharacterException(yytext()); }
+
+"#" { throw new UnknownCharacterException(yytext()); }
+
