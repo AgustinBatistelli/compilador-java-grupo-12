@@ -33,6 +33,7 @@ terminal STRING;
 terminal COLON;
 terminal COMMA;
 terminal COMMENT;
+terminal OR;
 
 // Non Terminals
 non terminal program;
@@ -61,16 +62,16 @@ program ::= sentences
 sentences ::= sentence sentences
            | ;
 
-sentence ::= init_block  {: System.out.println("Init block"); :};
-sentence ::= assignment  {: System.out.println("Assignment"); :};
-sentence ::= if_stmt {: System.out.println("If statement"); :};
-sentence ::= write_stmt  {: System.out.println("Write statement"); :};
-sentence ::= while_loop  {: System.out.println("While loop"); :};
+sentence ::= init_block;
+sentence ::= assignment;
+sentence ::= if_stmt;
+sentence ::= write_stmt;
+sentence ::= while_loop;
 
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
 
-assignment ::= IDENTIFIER ASSIGNATION expression {: System.out.println("Assignment"); :};
+assignment ::= IDENTIFIER:id ASSIGNATION expression {: System.out.println("Assignment to ID: "+ id); :};
 
 // IF
 if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
@@ -107,9 +108,40 @@ type ::= FLOAT {: System.out.println("Float"); RESULT = "float"; :}
       | INT {: System.out.println("Int"); RESULT = "int"; :}
       | STRING {: System.out.println("String"); RESULT = "string"; :};
 
-comparison ::= expression GREATER_THAN expression {: System.out.println("Comparison >"); :};
-comparison ::= expression LESS_THAN expression {: System.out.println("Comparison <"); :};
-comparison ::= expression EQUALS expression {: System.out.println("Comparison ="); :};
+comparison ::= expression:exp1 GREATER_THAN expression:exp2 {:
+    System.out.println("Comparison: " + exp1 + " > " + exp2);
+    RESULT = exp1 + " > " + exp2;
+:};
+
+comparison ::= expression:exp1 LESS_THAN expression:exp2 {:
+    System.out.println("Comparison: " + exp1 + " < " + exp2);
+    RESULT = exp1 + " < " + exp2;
+:};
+
+comparison ::= expression:exp1 EQUALS expression:exp2 {:
+    System.out.println("Comparison: " + exp1 + " = " + exp2);
+    RESULT = exp1 + " == " + exp2;
+:};
+
+comparison ::= comparison:comp OR expression:exp1 GREATER_THAN expression:exp2 {:
+    System.out.println("Comparison " + comp + " OR " + exp1 + " > " + exp2);
+    RESULT = comp + " OR " + exp1 + " > " + exp2;
+:};
+
+comparison ::= comparison:comp OR expression:exp1 LESS_THAN expression:exp2 {:
+    System.out.println("Comparison " + comp + " OR " + exp1 + " < " + exp2);
+    RESULT = comp + " OR " + exp1 + " < " + exp2;
+:};
+
+comparison ::= comparison:comp OR expression:exp1 EQUALS expression:exp2 {:
+    System.out.println("Comparison " + comp + " OR " + exp1 + " = " + exp2);
+    RESULT = comp + " OR " + exp1 + " = " + exp2;
+:};
+
+comparison ::= expression:exp1 {:
+    System.out.println("Comparison: " + exp1);
+    RESULT = exp1;
+:};
 
 expression ::= term
             | expression PLUS term {: System.out.println("+"); :}
@@ -119,6 +151,6 @@ term ::= factor
       | term MULT factor {: System.out.println("*"); :}
       | term DIV factor {: System.out.println("/"); :};
 
-factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); :};
+factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
+factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); RESULT = constant; :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};

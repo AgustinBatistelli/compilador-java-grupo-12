@@ -50,12 +50,12 @@ public class ParserTest {
 
     @Test
     void comment() throws Exception {
-        compilationSuccessful(readFromFile("comment.txt"));
+        compilationSuccessful(readFromFile("comment.txt")); // done
     }
 
     @Test
     void init() throws Exception {
-        compilationSuccessful(readFromFile("init.txt"));
+        compilationSuccessful(readFromFile("init.txt")); // done
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ParserTest {
 
     @Test
     void or() throws Exception {
-        compilationSuccessful(readFromFile("or.txt"));
+        compilationSuccessful(readFromFile("or.txt")); // done
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ParserTest {
 
     @Test
     void ifStatement() throws Exception {
-        compilationSuccessful(readFromFile("if.txt"));
+        compilationSuccessful(readFromFile("if.txt")); // done
     }
 
     @Test
