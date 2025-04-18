@@ -41,6 +41,7 @@ Sub = "-"
 Div = "/"
 Assig = "="
 Assignation = ":="
+ArithmeticAssig = "=:"
 Equals = "=="
 GreaterThan = ">"
 LessThan = "<"
@@ -112,6 +113,7 @@ StringLiteral = \"([^\"\\]|\\.)*\"
     {Div} { return symbol(ParserSym.DIV); }
     {Assignation} { return symbol(ParserSym.ASSIGNATION); }
     {Assig} { return symbol(ParserSym.ASSIG); }
+    {ArithmeticAssig} { return symbol(ParserSym.ARITHMETIC_ASSIG); }
     {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
     {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
     {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }

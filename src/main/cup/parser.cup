@@ -27,6 +27,7 @@ terminal STRING_LITERAL;
 terminal INTEGER_CONSTANT;
 terminal IDENTIFIER;
 terminal ASSIGNATION;
+terminal ARITHMETIC_ASSIG;
 terminal INIT;
 terminal FLOAT_TYPE;
 terminal INT;
@@ -79,6 +80,7 @@ init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
 
 assignment ::= IDENTIFIER:id ASSIGNATION expression {: System.out.println("Assignment to ID: "+ id); :};
 assignment ::= IDENTIFIER:id ASSIG expression {: System.out.println("ASSIG to ID: "+ id); :};
+assignment ::= IDENTIFIER:id ARITHMETIC_ASSIG expression {: System.out.println("ARITHMETIC_ASSIG to ID: "+ id); :};
 
 // IF
 if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE

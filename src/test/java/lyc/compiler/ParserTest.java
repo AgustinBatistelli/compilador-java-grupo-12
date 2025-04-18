@@ -29,7 +29,7 @@ public class ParserTest {
     }  // done
 
     @Test
-    void arithmetic() throws Exception {
+    void arithmetic() throws Exception { // done
         compilationSuccessful(readFromFile("arithmetic.txt"));
     }
 
