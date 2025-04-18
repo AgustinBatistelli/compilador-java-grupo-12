@@ -83,6 +83,9 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
 /* Main rules */
 <YYINITIAL> {
+  /* Handle '#' alone or unexpected */
+  "#" { throw new UnknownCharacterException("Unexpected '#' without content"); }
+
   /* Reserved words */
   "init" { return symbol(ParserSym.INIT); }
   "Float" { return symbol(ParserSym.FLOAT_TYPE); }
@@ -180,8 +183,8 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   \n { /* ignore newlines inside comment */ }
   "\+#" { yybegin(YYINITIAL); /* End of multi-line comment */ }
 }
-
 %%
 
 /* Error fallback */
-[^\r\n]+ { throw new UnknownCharacterException(yytext()); }
+. { throw new UnknownCharacterException(yytext()); }
+
