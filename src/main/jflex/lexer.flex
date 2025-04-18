@@ -75,7 +75,6 @@ NOT = "NOT"
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
 Float = (Digit+\.Digit*)|(\.Digit+)
-//IntegerConstant = ("-"?{Digit}+)
 IntegerConstant = {Digit}+
 
 
@@ -123,28 +122,25 @@ StringLiteral = \"([^\"\\]|\\.)*\"
     {Comma} { return symbol(ParserSym.COMMA); }
 
    /* Constants */
-  {IntegerConstant} {
-      try {
-          long value;
-          String text = yytext();
+  {IntegerConstant}  {
+    String text = yytext();
+    String digitsOnly = text.endsWith("L") || text.endsWith("l")
+                            ? text.substring(0, text.length() - 1)
+                            : text;
 
-          if (text.startsWith("-")) {
-              value = Long.parseLong(text.substring(1));
-              if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-                  throw new InvalidIntegerException(yytext());
-              }
-          } else {
-              value = Long.parseLong(text);
-              if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-                  throw new InvalidIntegerException(yytext());
-              }
-          }
-      } catch (NumberFormatException e) {
-          throw new InvalidIntegerException(yytext());
-      }
-      return symbol(ParserSym.INTEGER_CONSTANT, yytext());
+    if (digitsOnly.length() > 10) {
+        throw new InvalidIntegerException(text);
+    }
+
+    try {
+        int value = Integer.parseInt(digitsOnly);
+    } catch (NumberFormatException e) {
+        throw new InvalidIntegerException(text);
+    }
+
+    return symbol(ParserSym.INTEGER_CONSTANT, text);
   }
-  /* string literal */
+    /* string literal */
    {StringLiteral} {
      if (yytext().length() - 2 > MAX_STRING_LENGTH) {
        throw new InvalidLengthException("StringLiteral too long");
