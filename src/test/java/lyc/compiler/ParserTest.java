@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class ParserTest {
 
     @Test
-    public void assignmentWithExpression() throws Exception {
+    public void assignmentWithExpression() throws Exception { // done
         compilationSuccessful("c=d*(e-21)/4");
     }
 

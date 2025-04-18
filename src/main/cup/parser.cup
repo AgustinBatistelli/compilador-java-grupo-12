@@ -78,6 +78,7 @@ init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
 
 assignment ::= IDENTIFIER:id ASSIGNATION expression {: System.out.println("Assignment to ID: "+ id); :};
+assignment ::= IDENTIFIER:id ASSIG expression {: System.out.println("ASSIG to ID: "+ id); :};
 
 // IF
 if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
