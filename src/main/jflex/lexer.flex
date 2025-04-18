@@ -75,11 +75,10 @@ NOT = "NOT"
 
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
-Float = (Digit+\.Digit*)|(\.Digit+)
+FloatConstant = ({Digit}+\.{Digit}+) | ({Digit}+\. ) | ( \.{Digit}+ )
 IntegerConstant = {Digit}+
+StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
-
-StringLiteral = \"([^\"\\]|\\.)*\"
 
 %%
 
@@ -151,7 +150,10 @@ StringLiteral = \"([^\"\\]|\\.)*\"
    }
 
    /* float */
-   {Float} { return new Symbol(ParserSym.FLOAT, yytext()); }
+   {FloatConstant} {
+       System.out.println("Float: " + yytext());
+       return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+   }
 
    /* identifiers */
    {Identifier} {
@@ -168,10 +170,13 @@ StringLiteral = \"([^\"\\]|\\.)*\"
 /* comment */
 "/*" ([^*] | \*+[^*/])* \*+ "/" { /* ignore C-style comment */ }
 <COMMENT> {
-  [^#\n]+ { /*  ignore comment content  */ }
-  "#" { /* ignore # loose  */ }
-  \n { /* ignore line breaks */ }
-  "\+#" { yybegin(YYINITIAL); return symbol(ParserSym.COMMENT); } /* end of comment */
+   [^#\n]+    { /* Ignore any content in the comment that isn't a '#' or newline */ }
+   "#"        { /* Ignore the '#' symbol as part of comments */ }
+   "\""       { /* Ignore regular double quotes inside comments */ }
+   "“"        { /* Ignore opening curly quotes inside comments */ }
+   "”"        { /* Ignore closing curly quotes inside comments */ }
+   \n         { /* Ignore newline characters to continue reading the comment */ }
+   "\+#"      { yybegin(YYINITIAL); return symbol(ParserSym.COMMENT); } /* End of comment */
 }
 
 %%

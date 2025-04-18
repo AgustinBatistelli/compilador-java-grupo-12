@@ -25,6 +25,7 @@ terminal READ;
 terminal WRITE;
 terminal STRING_LITERAL;
 terminal INTEGER_CONSTANT;
+terminal FLOAT_CONSTANT;
 terminal IDENTIFIER;
 terminal ASSIGNATION;
 terminal ARITHMETIC_ASSIG;
@@ -38,7 +39,6 @@ terminal COMMENT;
 terminal OR;
 terminal AND;
 terminal NOT;
-terminal FLOAT;
 
 // Non Terminals
 non terminal program;
@@ -78,6 +78,7 @@ sentence ::= read_stmt;
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
 
+// ASSIGNMENT
 assignment ::= IDENTIFIER:id ASSIGNATION expression {: System.out.println("Assignment to ID: "+ id); :};
 assignment ::= IDENTIFIER:id ASSIG expression {: System.out.println("ASSIG to ID: "+ id); :};
 assignment ::= IDENTIFIER:id ARITHMETIC_ASSIG expression {: System.out.println("ARITHMETIC_ASSIG to ID: "+ id); :};
@@ -208,6 +209,6 @@ term ::= factor
 
 factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
 factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); RESULT = constant; :};
+factor ::= FLOAT_CONSTANT:f {: System.out.println("Constant: " + f); RESULT = f; :};
 factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
-factor ::= FLOAT:f {: System.out.println("Float constant: " + f); RESULT = f; :};
 factor ::= STRING_LITERAL:str {: System.out.println("String literal: " + str); RESULT = str; :};
