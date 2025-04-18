@@ -1,6 +1,8 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
+import lyc.compiler.SymbolTable;
+import java.util.*;
 
 class Parser;
 
@@ -63,6 +65,9 @@ non terminal type;
 start with program;
 
 program ::= sentences
+          {:
+             SymbolTable.save();
+          :}
           | COMMENT program;
 
 sentences ::= sentence sentences
@@ -113,19 +118,25 @@ read_stmt ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
 
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
 
-variable_declaration ::= identifier_list:list COLON type:type
-                       {:
-                            System.out.println("Variable declaration: " + list + " of type " + type);
-                       :};
+variable_declaration ::= identifier_list:list COLON type:type {:
+    System.out.println("Variable declaration: " + list + " of type " + type);
+    for (String id : (ArrayList<String>) list) {
+        SymbolTable.add(id.trim(), type.toString());
+    }
+:};
 
 identifier_list ::= IDENTIFIER:id {:
-                        System.out.println("Id: " + id);
-                        RESULT = id;
-                   :};
+    System.out.println("Id: " + id);
+    List<String> ids = new ArrayList<>();
+    ids.add(id.toString());
+    RESULT = ids;
+:};
+
 identifier_list ::= identifier_list:list COMMA IDENTIFIER:id {:
-                       System.out.println("List: " + list + ", ID: " + id);
-                       RESULT = list + ", " + id;
-                  :};
+    System.out.println("List: " + list + ", ID: " + id);
+    ((List<String>) list).add(id.toString());
+    RESULT = list;
+:};
 
 type ::= FLOAT_TYPE {: System.out.println("Float"); RESULT = "float"; :}
       | INT {: System.out.println("Int"); RESULT = "int"; :}
