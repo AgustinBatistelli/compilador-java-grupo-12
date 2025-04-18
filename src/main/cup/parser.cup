@@ -102,7 +102,7 @@ write_stmt ::= WRITE OPEN_BRACKET STRING_LITERAL:str CLOSE_BRACKET
 
 write_stmt ::= WRITE OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
             {:
-                System.out.println("Write statement with identifier: " + id);
+                System.out.println("Write statement with variable: " + id);
                 RESULT = "write(" + id + ")";
             :};
 
@@ -210,16 +210,28 @@ comparison ::= expression:exp1 {:
     RESULT = exp1;
 :};
 
-expression ::= term
-            | expression PLUS term {: System.out.println("+"); :}
-            | expression SUB term {: System.out.println("-"); :};
+expression ::= term:exp {: RESULT = exp; :};
+expression ::=  expression:exp1 PLUS term:exp2 {:
+                System.out.println(exp1 + " + " + exp2);
+                RESULT = exp1 + " + " + exp2;
+            :};
+expression ::= expression:exp1 SUB term:exp2 {:
+                System.out.println(exp1 + " - " + exp2);
+                RESULT = exp1 + " - " + exp2;
+               :};
 
-term ::= factor
-      | term MULT factor {: System.out.println("*"); :}
-      | term DIV factor {: System.out.println("/"); :};
+term ::= factor:exp {: RESULT = exp; :};
+term ::= term:exp1 MULT factor:exp2 {:
+            System.out.println(exp1 + " * " + exp2);
+            RESULT = exp1 + " * " + exp2;
+         :};
+term ::= term:exp1 DIV factor:exp2 {:
+           System.out.println(exp1 + " / " + exp2);
+           RESULT = exp1 + " / " + exp2;
+         :};
 
 factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
 factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); RESULT = constant; :};
 factor ::= FLOAT_CONSTANT:f {: System.out.println("Constant: " + f); RESULT = f; :};
-factor ::= OPEN_BRACKET expression CLOSE_BRACKET {: System.out.println("Factor = (Expression)"); :};
+factor ::= OPEN_BRACKET expression:exp CLOSE_BRACKET {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};
 factor ::= STRING_LITERAL:str {: System.out.println("String literal: " + str); RESULT = str; :};
