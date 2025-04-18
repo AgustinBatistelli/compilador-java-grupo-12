@@ -1,7 +1,7 @@
 package lyc.compiler;
 
 import java_cup.runtime.*;
-import lyc.compiler.SymbolTable;
+import lyc.compiler.files.SymbolTableGenerator;
 import java.util.*;
 
 class Parser;
@@ -60,33 +60,47 @@ non terminal variable_declaration;
 non terminal variable_declaration_list;
 non terminal identifier_list;
 non terminal type;
+non terminal assign_operator;
+
 
 // Start Symbol Definition
 start with program;
 
 program ::= sentences
           {:
-             SymbolTable.save();
-          :}
-          | COMMENT program;
+              SymbolTableGenerator generator = new SymbolTableGenerator();
+              generator.generate();
+          :};
 
 sentences ::= sentence sentences
-           | ;
+             | ;
 
-sentence ::= init_block;
-sentence ::= assignment;
-sentence ::= if_stmt;
-sentence ::= write_stmt;
-sentence ::= while_loop;
-sentence ::= read_stmt;
+sentence ::= assignment
+           | if_stmt
+           | while_loop
+           | init_block
+           | read_stmt
+           | write_stmt
+           | COMMENT
+           ;
+
 
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block"); :};
 
 // ASSIGNMENT
-assignment ::= IDENTIFIER:id ASSIGNATION expression {: System.out.println("Assignment to ID: "+ id); :};
-assignment ::= IDENTIFIER:id ASSIG expression {: System.out.println("ASSIG to ID: "+ id); :};
-assignment ::= IDENTIFIER:id ARITHMETIC_ASSIG expression {: System.out.println("ARITHMETIC_ASSIG to ID: "+ id); :};
+assignment ::= IDENTIFIER:id assign_operator expression {:
+    System.out.println("Assignment to ID: " + id);
+    if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+        SymbolTableGenerator.addVariable(id.toString().trim(), "-");
+    }
+:};
+
+assign_operator ::= ASSIGNATION
+                  | ARITHMETIC_ASSIG
+                  | ASSIG
+                  ;
+
 
 // IF
 if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
@@ -119,22 +133,26 @@ read_stmt ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
 
 variable_declaration ::= identifier_list:list COLON type:type {:
-    System.out.println("Variable declaration: " + list + " of type " + type);
+    System.out.println("[Var Declaration] " + list + " : " + type);
     for (String id : (ArrayList<String>) list) {
-        SymbolTable.add(id.trim(), type.toString());
+        id = id.trim();
+        if (!SymbolTableGenerator.isVariableDefined(id)) {
+            SymbolTableGenerator.addVariable(id, type.toString());
+        }
     }
 :};
+
 
 identifier_list ::= IDENTIFIER:id {:
     System.out.println("Id: " + id);
     List<String> ids = new ArrayList<>();
-    ids.add(id.toString());
+    ids.add(id.toString().trim());
     RESULT = ids;
 :};
 
 identifier_list ::= identifier_list:list COMMA IDENTIFIER:id {:
     System.out.println("List: " + list + ", ID: " + id);
-    ((List<String>) list).add(id.toString());
+    ((List<String>) list).add(id.toString().trim());
     RESULT = list;
 :};
 
@@ -231,7 +249,25 @@ term ::= term:exp1 DIV factor:exp2 {:
          :};
 
 factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
-factor ::= INTEGER_CONSTANT:constant {: System.out.println("Constant: " + constant); RESULT = constant; :};
-factor ::= FLOAT_CONSTANT:f {: System.out.println("Constant: " + f); RESULT = f; :};
+factor ::= INTEGER_CONSTANT:constant {:
+            System.out.println("Constant: " + constant);
+            String value = constant.toString();
+            SymbolTableGenerator.addConstant(value, "int", value);
+            RESULT = value;
+            :};
+
+factor ::= FLOAT_CONSTANT:constant {:
+            System.out.println("Constant: " + constant);
+            String value = constant.toString();
+            SymbolTableGenerator.addConstant(value, "float", value);
+            RESULT = constant;
+            :};
+
+factor ::= STRING_LITERAL:literal {:
+            System.out.println("String literal: " + literal);
+            String value = literal.toString();
+            SymbolTableGenerator.addConstant(value, "string", value);
+            RESULT = literal;
+            :};
+
 factor ::= OPEN_BRACKET expression:exp CLOSE_BRACKET {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};
-factor ::= STRING_LITERAL:str {: System.out.println("String literal: " + str); RESULT = str; :};

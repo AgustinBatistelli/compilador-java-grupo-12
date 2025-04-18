@@ -79,12 +79,11 @@ FloatConstant = ({Digit}+\.{Digit}+) | ({Digit}+\. ) | ( \.{Digit}+ )
 IntegerConstant = {Digit}+
 StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
-
 %%
 
-/* keywords */
+/* Main rules */
 <YYINITIAL> {
-  /* reserved words */
+  /* Reserved words */
   "init" { return symbol(ParserSym.INIT); }
   "Float" { return symbol(ParserSym.FLOAT_TYPE); }
   "Int" { return symbol(ParserSym.INT); }
@@ -98,91 +97,91 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   "AND" { return symbol(ParserSym.AND); }
   "NOT" { return symbol(ParserSym.NOT); }
 
-  /* start comment:  #+ ... +# */
-   "#+" { yybegin(COMMENT); }
+  /* Start multi-line comment */
+  "#+" { yybegin(COMMENT); }
 
-   /* start comment: /* ... */ */
-   "/*" ([^*] | \*+[^*/])* \*+ "/" { /* ignore C-style comment */ }
+  /* Single-line comment */
+  "#" [^\n]* { /* Ignore single-line comment */ }
 
-   /* operators */
-    {Equals} {return symbol(ParserSym.EQUALS); }
-    {Plus} { return symbol(ParserSym.PLUS); }
-    {Sub} { return symbol(ParserSym.SUB); }
-    {Mult} { return symbol(ParserSym.MULT); }
-    {Div} { return symbol(ParserSym.DIV); }
-    {Assignation} { return symbol(ParserSym.ASSIGNATION); }
-    {Assig} { return symbol(ParserSym.ASSIG); }
-    {ArithmeticAssig} { return symbol(ParserSym.ARITHMETIC_ASSIG); }
-    {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
-    {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
-    {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
-    {LessThan} { return symbol(ParserSym.LESS_THAN); }
-    {OpenBrace} { return symbol(ParserSym.OPEN_BRACE); }
-    {CloseBrace} { return symbol(ParserSym.CLOSE_BRACE); }
-    {Colon} { return symbol(ParserSym.COLON); }
-    {Comma} { return symbol(ParserSym.COMMA); }
+  /* C-style comment (/* ... */) */
+  "/*" ([^*]|\*+[^*/])*\*+ "/" { /* ignore C-style comment */ }
 
-   /* Constants */
-  {IntegerConstant}  {
+  /* Operators */
+  {Equals} { return symbol(ParserSym.EQUALS); }
+  {Plus} { return symbol(ParserSym.PLUS); }
+  {Sub} { return symbol(ParserSym.SUB); }
+  {Mult} { return symbol(ParserSym.MULT); }
+  {Div} { return symbol(ParserSym.DIV); }
+  {Assignation} { return symbol(ParserSym.ASSIGNATION); }
+  {Assig} { return symbol(ParserSym.ASSIG); }
+  {ArithmeticAssig} { return symbol(ParserSym.ARITHMETIC_ASSIG); }
+  {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
+  {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
+  {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
+  {LessThan} { return symbol(ParserSym.LESS_THAN); }
+  {OpenBrace} { return symbol(ParserSym.OPEN_BRACE); }
+  {CloseBrace} { return symbol(ParserSym.CLOSE_BRACE); }
+  {Colon} { return symbol(ParserSym.COLON); }
+  {Comma} { return symbol(ParserSym.COMMA); }
+
+  /* Constants */
+  {IntegerConstant} {
     String text = yytext();
     String digitsOnly = text.endsWith("L") || text.endsWith("l")
                             ? text.substring(0, text.length() - 1)
                             : text;
 
     if (digitsOnly.length() > 10) {
-        throw new InvalidIntegerException(text);
+      throw new InvalidIntegerException(text);
     }
 
     try {
-        int value = Integer.parseInt(digitsOnly);
+      int value = Integer.parseInt(digitsOnly);
     } catch (NumberFormatException e) {
-        throw new InvalidIntegerException(text);
+      throw new InvalidIntegerException(text);
     }
 
     return symbol(ParserSym.INTEGER_CONSTANT, text);
   }
-    /* string literal */
-   {StringLiteral} {
-     if (yytext().length() - 2 > MAX_STRING_LENGTH) {
-       throw new InvalidLengthException("StringLiteral too long");
-     }
-     return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length()-1));
-   }
 
-   /* float */
-   {FloatConstant} {
-       System.out.println("Float: " + yytext());
-       return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-   }
+  /* String literal */
+  {StringLiteral} {
+    if (yytext().length() - 2 > MAX_STRING_LENGTH) {
+      throw new InvalidLengthException("StringLiteral too long");
+    }
+    return symbol(ParserSym.STRING_LITERAL, yytext().substring(1, yytext().length() - 1));
+  }
 
-   /* identifiers */
-   {Identifier} {
-     if (yytext().length() > MAX_IDENTIFIER_LENGTH) {
-       throw new InvalidLengthException("Identifier too long");
-     }
-     return symbol(ParserSym.IDENTIFIER, yytext());
-   }
+  /* Float */
+  {FloatConstant} {
+    System.out.println("Float: " + yytext());
+    return symbol(ParserSym.FLOAT_CONSTANT, yytext());
+  }
 
-  /* whitespace */
+  /* Identifiers */
+  {Identifier} {
+    if (yytext().length() > MAX_IDENTIFIER_LENGTH) {
+      throw new InvalidLengthException("Identifier too long");
+    }
+    return symbol(ParserSym.IDENTIFIER, yytext());
+  }
+
+  /* Whitespace */
   {WhiteSpace} { /* ignore */ }
 }
 
-/* comment */
-"/*" ([^*] | \*+[^*/])* \*+ "/" { /* ignore C-style comment */ }
+/* Multi-line comment */
 <COMMENT> {
-   [^#\n]+    { /* Ignore any content in the comment that isn't a '#' or newline */ }
-   "#"        { /* Ignore the '#' symbol as part of comments */ }
-   "\""       { /* Ignore regular double quotes inside comments */ }
-   "“"        { /* Ignore opening curly quotes inside comments */ }
-   "”"        { /* Ignore closing curly quotes inside comments */ }
-   \n         { /* Ignore newline characters to continue reading the comment */ }
-   "\+#"      { yybegin(YYINITIAL); return symbol(ParserSym.COMMENT); } /* End of comment */
+  [^#\n]+ { /* ignore content */ }
+  "#" { /* ignore standalone '#' inside comment */ }
+  "\"" { /* ignore regular double quotes inside comment */ }
+  "“" { /* ignore opening curly quotes inside comment */ }
+  "”" { /* ignore closing curly quotes inside comment */ }
+  \n { /* ignore newlines inside comment */ }
+  "\+#" { yybegin(YYINITIAL); /* End of multi-line comment */ }
 }
 
 %%
 
-/* error fallback */
-[^\r\n]+  { throw new UnknownCharacterException(yytext()); }
-
-"#" { throw new UnknownCharacterException(yytext()); }
-
+/* Error fallback */
+[^\r\n]+ { throw new UnknownCharacterException(yytext()); }
