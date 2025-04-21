@@ -13,10 +13,12 @@ terminal PLUS;
 terminal SUB;
 terminal MULT;
 terminal DIV;
-terminal OPEN_BRACKET;
-terminal CLOSE_BRACKET;
+terminal OPEN_PARENTHESES;
+terminal CLOSE_PARENTHESES;
 terminal OPEN_BRACE;
 terminal CLOSE_BRACE;
+terminal OPEN_BRACKET;
+terminal CLOSE_BRACKET;
 terminal EQUALS;
 terminal GREATER_THAN;
 terminal LESS_THAN;
@@ -41,6 +43,8 @@ terminal COMMENT;
 terminal OR;
 terminal AND;
 terminal NOT;
+terminal REORDER;
+terminal BOOL;
 
 // Non Terminals
 non terminal program;
@@ -61,6 +65,9 @@ non terminal variable_declaration_list;
 non terminal identifier_list;
 non terminal type;
 non terminal assign_operator;
+non terminal reorder_stmt;
+non terminal reorder_list;
+non terminal reorder_list_elements;
 
 
 // Start Symbol Definition
@@ -81,6 +88,7 @@ sentence ::= assignment
            | init_block
            | read_stmt
            | write_stmt
+           | reorder_stmt
            | COMMENT
            ;
 
@@ -103,32 +111,55 @@ assign_operator ::= ASSIGNATION
 
 
 // IF
-if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
+if_stmt ::= IF OPEN_PARENTHESES comparison CLOSE_PARENTHESES OPEN_BRACE sentences CLOSE_BRACE
             {: System.out.println("If statement with block parsed");:};
-if_stmt ::= IF OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE ELSE OPEN_BRACE sentences CLOSE_BRACE
+if_stmt ::= IF OPEN_PARENTHESES comparison CLOSE_PARENTHESES OPEN_BRACE sentences CLOSE_BRACE ELSE OPEN_BRACE sentences CLOSE_BRACE
             {: System.out.println("If-Else statement parsed"); :};
 
-write_stmt ::= WRITE OPEN_BRACKET STRING_LITERAL:str CLOSE_BRACKET
+write_stmt ::= WRITE OPEN_PARENTHESES STRING_LITERAL:str CLOSE_PARENTHESES
              {:
                 System.out.println("Write statement with string literal: " + str);
                 RESULT = "write(" + str + ")";
              :};
 
-write_stmt ::= WRITE OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
+write_stmt ::= WRITE OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
             {:
                 System.out.println("Write statement with variable: " + id);
                 RESULT = "write(" + id + ")";
             :};
 
-while_loop ::= WHILE OPEN_BRACKET comparison CLOSE_BRACKET OPEN_BRACE sentences CLOSE_BRACE
+while_loop ::= WHILE OPEN_PARENTHESES comparison CLOSE_PARENTHESES OPEN_BRACE sentences CLOSE_BRACE
              {: System.out.println("While with condition"); :};
 
-read_stmt ::= READ OPEN_BRACKET IDENTIFIER:id CLOSE_BRACKET
+read_stmt ::= READ OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
             {:
                 System.out.println("Read statement with variable: "+ id);
                 RESULT = "read(" + id + ")";
             :};
 
+reorder_stmt ::= REORDER OPEN_PARENTHESES OPEN_BRACKET reorder_list:reorder_list CLOSE_BRACKET COMMA BOOL:bool COMMA INTEGER_CONSTANT:pivot CLOSE_PARENTHESES
+               {:
+                    System.out.println("Reorder with list: " + reorder_list + ", boolean: " + bool + ", pivot: " + pivot);
+               :};
+
+reorder_list ::= reorder_list_elements:reorder_list
+               {:
+                    System.out.println("REORDER_LIST: " + reorder_list);
+                    RESULT = reorder_list;
+               :};
+
+reorder_list_elements ::= expression:exp
+                       {:
+                            List<Object> list = new ArrayList<>();
+                            list.add(exp);
+                            RESULT = list;
+                       :};
+
+reorder_list_elements ::= reorder_list_elements:list COMMA expression:exp
+                        {:
+                            ((List<Object>) list).add(exp);
+                            RESULT = list;
+                        :};
 
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
 
@@ -270,4 +301,4 @@ factor ::= STRING_LITERAL:literal {:
             RESULT = literal;
             :};
 
-factor ::= OPEN_BRACKET expression:exp CLOSE_BRACKET {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};
+factor ::= OPEN_PARENTHESES expression:exp CLOSE_PARENTHESES {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};

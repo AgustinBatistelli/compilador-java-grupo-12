@@ -49,8 +49,10 @@ LessThan = "<"
 // Symbols
 OpenBrace = "{"
 CloseBrace = "}"
-OpenBracket = "("
-CloseBracket = ")"
+OpenParentheses  = "("
+CloseParentheses = ")"
+OpenBracket = "["
+CloseBracket = "]"
 Colon = ":"
 Comma  = ","
 
@@ -62,11 +64,13 @@ Init = "init"
 Int = "Int"
 FloatType = "Float"
 String = "String"
+Bool = "0" | "1"
 If = "if"
 Else = "else"
 While = "while"
 Read = "read"
 Write = "write"
+Reorder = "reorder"
 
 // Logic Operators
 OR = "OR"
@@ -99,6 +103,7 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   "OR" { return symbol(ParserSym.OR); }
   "AND" { return symbol(ParserSym.AND); }
   "NOT" { return symbol(ParserSym.NOT); }
+  "reorder" { return symbol(ParserSym.REORDER); }
 
   /* Start multi-line comment */
   "#+" { yybegin(COMMENT); }
@@ -118,12 +123,14 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   {Assignation} { return symbol(ParserSym.ASSIGNATION); }
   {Assig} { return symbol(ParserSym.ASSIG); }
   {ArithmeticAssig} { return symbol(ParserSym.ARITHMETIC_ASSIG); }
+  {OpenParentheses} { return symbol(ParserSym.OPEN_PARENTHESES); }
+  {CloseParentheses} { return symbol(ParserSym.CLOSE_PARENTHESES); }
   {OpenBracket} { return symbol(ParserSym.OPEN_BRACKET); }
   {CloseBracket} { return symbol(ParserSym.CLOSE_BRACKET); }
-  {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
-  {LessThan} { return symbol(ParserSym.LESS_THAN); }
   {OpenBrace} { return symbol(ParserSym.OPEN_BRACE); }
   {CloseBrace} { return symbol(ParserSym.CLOSE_BRACE); }
+  {GreaterThan} { return symbol(ParserSym.GREATER_THAN); }
+  {LessThan} { return symbol(ParserSym.LESS_THAN); }
   {Colon} { return symbol(ParserSym.COLON); }
   {Comma} { return symbol(ParserSym.COMMA); }
 
@@ -171,6 +178,9 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
   /* Whitespace */
   {WhiteSpace} { /* ignore */ }
+
+  /* Boolean */
+  {Bool} { return symbol(ParserSym.BOOL); }
 }
 
 /* Multi-line comment */

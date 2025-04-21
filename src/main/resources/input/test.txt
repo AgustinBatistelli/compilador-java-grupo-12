@@ -70,3 +70,21 @@ while (a > b)
 
 write(“ewr”)  #+ “ewr” es una cte string +#
 write(var1)  #+ var1 es una variable numérica definida previamente +#
+
+
+
+#+ TEST PARA LA FUNCION REORDER *#
+reorder([x+3, 1+1, 9-x], 1, 2)  #+ caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) #+
+reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) #+
+
+#+ Test que fallan para probar borrar el caracter de comentario de apertura y de cierre del bloque +#
+
+#+
+reorder([x+3, 1+1, 9-x], 2, 2) # + Error: valor booleano no es 0 o 1 + #
+reorder(x+3, 1+1, 9-x, 1, 2) # + Error: falta corchetes + #
+reorder([x+3, 1+1, 9-x], 1, 2.5) # + Error: el pivote no es un entero + #
+reorder([], 1, 0) # + Error: lista vacía + #
+reorder([x+3, 1+1, 9-x], 1) # + Error: falta parámetro pivote + #
++#
