@@ -64,7 +64,6 @@ Init = "init"
 Int = "Int"
 FloatType = "Float"
 String = "String"
-Bool = "0" | "1"
 If = "if"
 Else = "else"
 While = "while"
@@ -178,9 +177,6 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
   /* Whitespace */
   {WhiteSpace} { /* ignore */ }
-
-  /* Boolean */
-  {Bool} { return symbol(ParserSym.BOOL); }
 }
 
 /* Multi-line comment */
@@ -194,6 +190,8 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   "\+#" { yybegin(YYINITIAL); /* End of multi-line comment */ }
 }
 %%
+
+
 
 /* Error fallback */
 . { throw new UnknownCharacterException(yytext()); }

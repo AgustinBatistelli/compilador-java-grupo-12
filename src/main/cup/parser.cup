@@ -68,6 +68,7 @@ non terminal assign_operator;
 non terminal reorder_stmt;
 non terminal reorder_list;
 non terminal reorder_list_elements;
+non terminal bool_expression;
 
 
 // Start Symbol Definition
@@ -137,28 +138,35 @@ read_stmt ::= READ OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
                 RESULT = "read(" + id + ")";
             :};
 
-reorder_stmt ::= REORDER OPEN_PARENTHESES OPEN_BRACKET reorder_list:reorder_list CLOSE_BRACKET COMMA BOOL:bool COMMA INTEGER_CONSTANT:pivot CLOSE_PARENTHESES
+// Reorder
+reorder_stmt ::= REORDER OPEN_PARENTHESES OPEN_BRACKET reorder_list:list CLOSE_BRACKET COMMA bool_expression:bool COMMA INTEGER_CONSTANT:int_const CLOSE_PARENTHESES
+                {:
+                  System.out.println("Reorder statement detectada.");
+                  System.out.println("Lista de elementos: " + list);
+                  System.out.println("Valor de BOOL: " + bool);
+                  System.out.println("Valor de INTEGER_CONSTANT: " + int_const);
+                  RESULT = "reorder(" + list + "," + bool + "," + int_const + ")";
+                :};
+
+
+reorder_list ::= reorder_list_elements:list
                {:
-                    System.out.println("Reorder with list: " + reorder_list + ", boolean: " + bool + ", pivot: " + pivot);
+                    System.out.println("Lista de elementos procesados: " + list);
+                    RESULT = list;
+                    System.out.println("Resultado final de la lista: " + RESULT);
+
                :};
 
-reorder_list ::= reorder_list_elements:reorder_list
-               {:
-                    System.out.println("REORDER_LIST: " + reorder_list);
-                    RESULT = reorder_list;
-               :};
 
 reorder_list_elements ::= expression:exp
-                       {:
-                            List<Object> list = new ArrayList<>();
-                            list.add(exp);
-                            RESULT = list;
-                       :};
-
-reorder_list_elements ::= reorder_list_elements:list COMMA expression:exp
                         {:
-                            ((List<Object>) list).add(exp);
-                            RESULT = list;
+                            System.out.println("Elemento añadido: " + exp);
+                            RESULT = exp;
+                        :}
+                        | expression:exp COMMA reorder_list_elements:list
+                        {:
+                            System.out.println("Sumando: " + exp + " A lista: " + list);
+                            RESULT = exp + ", " + list;
                         :};
 
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
@@ -302,3 +310,11 @@ factor ::= STRING_LITERAL:literal {:
             :};
 
 factor ::= OPEN_PARENTHESES expression:exp CLOSE_PARENTHESES {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};
+
+bool_expression ::= INTEGER_CONSTANT:integer_constant
+        {:
+          if (!integer_constant.equals("0") && !integer_constant.equals("1")) {
+            throw new Exception("Invalid boolean constant: " + integer_constant);
+          }
+          RESULT = integer_constant;
+        :};
