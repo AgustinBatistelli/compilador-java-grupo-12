@@ -79,15 +79,16 @@ reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ caso bien escrito +#
 reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) #+
 reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) #+
 
-#+ Test que fallan para probar borrar el caracter de comentario de apertura y de cierre del bloque +#
+#+ Test que fallan para probar borrar el caracter de comentario de apertura ("/*") y de cierre del bloque ("*/") +#
 
-#+
+/*
 reorder([x+3, 1+1, 9-x], 2, 2) # + Error: valor booleano no es 0 o 1 + #
 reorder(x+3, 1+1, 9-x, 1, 2) # + Error: falta corchetes + #
 reorder([x+3, 1+1, 9-x], 1, 2.5) # + Error: el pivote no es un entero + #
 reorder([], 1, 0) # + Error: lista vacía + #
 reorder([x+3, 1+1, 9-x], 1) # + Error: falta parámetro pivote + #
-+#
+*/
+
 
 
 #+ TEST PARA LA FUNCION NegativeCalculation *#
@@ -108,12 +109,14 @@ x := negativeCalculation(3.0, a, b, c, d) #+ Caso con número negativo impar (pr
 x := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
 x := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) *#
 
-#+ Test que fallan para probar borrar el caracter de comentario de apertura y de cierre del bloque +#
 
-#+
+
+#+ Test que fallan para probar borrar el caracter de comentario de apertura ("/*") y de cierre del bloque ("*/") +#
+
+/*
     x := negativeCalculation() #+ Caso con lista vacia #+
     x := negativeCalculation("a", "b", "c") #+ Caso con tipo de dato incorrecto (strings en lugar de floats) +#
     x := negativeCalculation(4, -3) #+ Casos con valores no flotantes (numeros enteros) +#
     x := negativeCalculation(4.5, "invalid", -3.0) #+ Caso con listas de floats mezclada con tipos incorrectos +#
-+#
+*/
 

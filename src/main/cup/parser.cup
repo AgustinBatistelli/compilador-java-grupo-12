@@ -171,7 +171,7 @@ reorder_list ::= reorder_list_elements:list
 
 reorder_list_elements ::= expression:exp
                         {:
-                            System.out.println("Elemento añadido: " + exp);
+                            System.out.println("Elemento agregado: " + exp);
                             RESULT = exp;
                         :}
                         | expression:exp COMMA reorder_list_elements:list
@@ -188,12 +188,12 @@ negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expres
 
 float_expression_list ::= FLOAT_CONSTANT:exp
                         {:
-                            System.out.println("Elemento añadido: " + exp);
+                            System.out.println("Elemento agregado: " + exp);
                             RESULT = exp;
                         :};
 float_expression_list ::= IDENTIFIER:id
                         {:
-                            System.out.println("Elemento añadido: " + id);
+                            System.out.println("Elemento agregado: " + id);
                             RESULT = id;
                         :};
 float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list

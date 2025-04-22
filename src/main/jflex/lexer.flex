@@ -190,7 +190,7 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   "“" { /* ignore opening curly quotes inside comment */ }
   "”" { /* ignore closing curly quotes inside comment */ }
   \n { /* ignore newlines inside comment */ }
-  "\+#" { yybegin(YYINITIAL); /* End of multi-line comment */ }
+  "+#" { yybegin(YYINITIAL); /* End of multi-line comment */ }
 }
 %%
 
