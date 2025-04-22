@@ -107,7 +107,7 @@ a := (4 + 5) * (7 - 2) / 3
 b := x / (y - z)
 c := (m + n) * (p - q) / (r + s)
 
-#+ CASOS QUE FALLAN EN ASIGNACIONES (AGRUPADOS EN COMENTARIO) +#
+#+ CASOS QUE FALLAN EN ASIGNACIONES (AGRUPADOS EN COMENTARIO) (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
 a := (4 + ) * (7 - 2) / 3  #+ Error: operación incompleta +#
 b := x / (y - )  #+ Error: falta operando en resta +#
@@ -129,7 +129,7 @@ if (NOT a == b)
     write("a no es igual a b")
 }
 
-#+ CASOS QUE FALLAN EN CONDICIONALES +#
+#+ CASOS QUE FALLAN EN CONDICIONALES (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
 if (a < b AND )
 {
@@ -155,7 +155,7 @@ while (i < 10)
     i := i + 1
 }
 
-#+ CASOS QUE FALLAN EN WHILE +#
+#+ CASOS QUE FALLAN EN WHILE (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
 while i < 10
 {
@@ -172,7 +172,7 @@ reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+ Caso donde no reordena porque no hay na
 reorder([5+5, 2*3, 9-4], 1, 1) #+ Caso válido invirtiendo elementos +#
 reorder([x, y, z], 0, 2) #+ Caso válido reordenando extremos +#
 
-#+ TESTS FALLIDOS PARA REORDER +#
+#+ TESTS FALLIDOS PARA REORDER (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
 reorder([x+3, 1+1, 9-x], 2, 2) #+ Error: valor booleano no es 0 o 1 +#
 reorder(x+3, 1+1, 9-x, 1, 2) #+ Error: falta corchetes +#
@@ -212,7 +212,7 @@ f := 3.0
 
 x := negativeCalculation(d, e, f) #+ Caso solo positivos +#
 
-#+ TESTS FALLIDOS PARA NegativeCalculation +#
+#+ TESTS FALLIDOS PARA NegativeCalculation (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/")+#
 /*
 x := negativeCalculation() #+ Error: lista vacía +#
 x := negativeCalculation("a", "b", "c") #+ Error: tipo incorrecto (strings) +#
