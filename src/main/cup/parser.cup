@@ -44,7 +44,8 @@ terminal OR;
 terminal AND;
 terminal NOT;
 terminal REORDER;
-terminal BOOL;
+terminal NEGATIVE_CALCULATION;
+
 
 // Non Terminals
 non terminal program;
@@ -69,6 +70,8 @@ non terminal reorder_stmt;
 non terminal reorder_list;
 non terminal reorder_list_elements;
 non terminal bool_expression;
+non terminal negative_calculation_stmt;
+non terminal float_expression_list;
 
 
 // Start Symbol Definition
@@ -90,6 +93,7 @@ sentence ::= assignment
            | read_stmt
            | write_stmt
            | reorder_stmt
+           | negative_calculation_stmt
            | COMMENT
            ;
 
@@ -100,6 +104,13 @@ init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
 // ASSIGNMENT
 assignment ::= IDENTIFIER:id assign_operator expression {:
     System.out.println("Assignment to ID: " + id);
+    if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+        SymbolTableGenerator.addVariable(id.toString().trim(), "-");
+    }
+:};
+
+assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
+    System.out.println("Assignment result of NegativeCalculation to ID: " + id);
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
         SymbolTableGenerator.addVariable(id.toString().trim(), "-");
     }
@@ -168,6 +179,34 @@ reorder_list_elements ::= expression:exp
                             System.out.println("Sumando: " + exp + " A lista: " + list);
                             RESULT = exp + ", " + list;
                         :};
+
+negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expression_list:exps CLOSE_PARENTHESES
+                {:
+                    System.out.println("Negative Calculation detectada con expresiones: " + exps);
+                    RESULT = "negativeCalculation(" + exps + ")";
+                :};
+
+float_expression_list ::= FLOAT_CONSTANT:exp
+                        {:
+                            System.out.println("Elemento añadido: " + exp);
+                            RESULT = exp;
+                        :};
+float_expression_list ::= IDENTIFIER:id
+                        {:
+                            System.out.println("Elemento añadido: " + id);
+                            RESULT = id;
+                        :};
+float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list
+                        {:
+                            System.out.println("Sumando FLOAT: " + exp + " A lista: " + list);
+                            RESULT = exp + ", " + list;
+                        :};
+float_expression_list ::= IDENTIFIER:id COMMA float_expression_list:list
+                        {:
+                            System.out.println("Sumando ID: " + id + " A lista: " + list);
+                            RESULT = id + ", " + list;
+                        :};
+
 
 variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
 

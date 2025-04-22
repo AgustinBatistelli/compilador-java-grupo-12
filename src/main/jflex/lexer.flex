@@ -70,6 +70,8 @@ While = "while"
 Read = "read"
 Write = "write"
 Reorder = "reorder"
+NegativeCalculation = "negativeCalculation"
+
 
 // Logic Operators
 OR = "OR"
@@ -78,7 +80,7 @@ NOT = "NOT"
 
 WhiteSpace = {LineTerminator} | {Identation}
 Identifier = {Letter} ({Letter}|{Digit})*
-FloatConstant = ({Digit}+\.{Digit}+) | ({Digit}+\. ) | ( \.{Digit}+ )
+FloatConstant = ("-")? (({Digit}+\.{Digit}+) | ({Digit}+\. ) | ( \.{Digit}+ ))
 IntegerConstant = {Digit}+
 StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
 
@@ -103,6 +105,7 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   "AND" { return symbol(ParserSym.AND); }
   "NOT" { return symbol(ParserSym.NOT); }
   "reorder" { return symbol(ParserSym.REORDER); }
+  "negativeCalculation" { return symbol(ParserSym.NEGATIVE_CALCULATION); }
 
   /* Start multi-line comment */
   "#+" { yybegin(COMMENT); }

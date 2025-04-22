@@ -88,3 +88,32 @@ reorder([x+3, 1+1, 9-x], 1, 2.5) # + Error: el pivote no es un entero + #
 reorder([], 1, 0) # + Error: lista vacía + #
 reorder([x+3, 1+1, 9-x], 1) # + Error: falta parámetro pivote + #
 +#
+
+
+#+ TEST PARA LA FUNCION NegativeCalculation *#
+a := 4.1
+b := -1.5
+c := 3.0
+
+x := negativeCalculation(-2.0, -4.0, a, b, c) #+ Caso con número negativo par (suma de negativos) +#
+
+
+a := -1.5
+b := 2.5
+c := -3.0
+d := 5.5
+
+x := negativeCalculation(3.0, a, b, c, d) #+ Caso con número negativo impar (producto de negativos) +#
+
+x := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
+x := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) *#
+
+#+ Test que fallan para probar borrar el caracter de comentario de apertura y de cierre del bloque +#
+
+#+
+    x := negativeCalculation() #+ Caso con lista vacia #+
+    x := negativeCalculation("a", "b", "c") #+ Caso con tipo de dato incorrecto (strings en lugar de floats) +#
+    x := negativeCalculation(4, -3) #+ Casos con valores no flotantes (numeros enteros) +#
+    x := negativeCalculation(4.5, "invalid", -3.0) #+ Caso con listas de floats mezclada con tipos incorrectos +#
++#
+
