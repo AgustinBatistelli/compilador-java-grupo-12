@@ -1,4 +1,4 @@
-c=d*(e-21)/4
+c = d * (e - 21) / 4
 
 a := 1
 b := 1
@@ -6,14 +6,13 @@ c := 2
 
 if (a > b AND c > b)
 {
-    write("a es mas grande que b y c es mas grande que b")
+    write("a es más grande que b y c es más grande que b")
 }
 
 x =: 27 - c
 x =: r + 500
 x =: 34 * 3
 x =: z / f
-
 
 a := 99999.99
 a := 99.
@@ -26,11 +25,11 @@ b := "asldk  fh sjf"
 
 if (a > b)
 {
-    write("a es mas grande que b")
+    write("a es más grande que b")
 }
 else
 {
-    write("a es mas chico o igual a b")
+    write("a es más chico o igual a b")
 }
 
 init {
@@ -45,7 +44,7 @@ c := 2
 
 if (NOT a > b)
 {
-    write("a no es mas grande que b")
+    write("a no es más grande que b")
 }
 
 a := 1
@@ -54,7 +53,7 @@ c := 2
 
 if (a > b OR c > b)
 {
-    write("a es mas grande que b o c es mas grande que b")
+    write("a es más grande que b o c es más grande que b")
 }
 
 read(base) #+ base es una variable +#
@@ -64,40 +63,132 @@ b := 3
 
 while (a > b)
 {
-    write("a es mas grande que b")
+    write("a es más grande que b")
     a := a + 1
 }
 
-write(“ewr”)  #+ “ewr” es una cte string +#
+write("ewr")  #+ “ewr” es una cte string +#
 write(var1)  #+ var1 es una variable numérica definida previamente +#
 
+#+ TEST PARA IF ANIDADOS +#
+a := 5
+b := 3
+c := 7
 
+if (a > b)
+{
+    if (c > a)
+    {
+        write("c es mayor que a, que es mayor que b")
+    }
+    else
+    {
+        write("a es mayor que b pero c no es mayor que a")
+    }
+}
+else
+{
+    write("b es mayor o igual a a")
+}
 
-#+ TEST PARA LA FUNCION REORDER *#
-reorder([x+3, 1+1, 9-x], 1, 2)  #+ caso bien escrito +#
-reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ caso bien escrito +#
-reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) #+
-reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) #+
+if (a == 5)
+{
+    if (b == 3)
+    {
+        if (c == 7)
+        {
+            write("todos los valores coinciden")
+        }
+    }
+}
 
-#+ Test que fallan para probar borrar el caracter de comentario de apertura ("/*") y de cierre del bloque ("*/") +#
+#+ TEST EXTRA PARA ASIGNACIONES Y OPERACIONES ARITMÉTICAS +#
+a := (4 + 5) * (7 - 2) / 3
+b := x / (y - z)
+c := (m + n) * (p - q) / (r + s)
 
+#+ CASOS QUE FALLAN EN ASIGNACIONES (AGRUPADOS EN COMENTARIO) +#
 /*
-reorder([x+3, 1+1, 9-x], 2, 2) # + Error: valor booleano no es 0 o 1 + #
-reorder(x+3, 1+1, 9-x, 1, 2) # + Error: falta corchetes + #
-reorder([x+3, 1+1, 9-x], 1, 2.5) # + Error: el pivote no es un entero + #
-reorder([], 1, 0) # + Error: lista vacía + #
-reorder([x+3, 1+1, 9-x], 1) # + Error: falta parámetro pivote + #
+a := (4 + ) * (7 - 2) / 3  #+ Error: operación incompleta +#
+b := x / (y - )  #+ Error: falta operando en resta +#
+c := * (m + n) (p - q)  #+ Error: operador fuera de lugar +#
 */
 
+#+ TEST EXTRA PARA CONDICIONALES +#
+a := 3
+b := 4
+c := 5
 
+if (a < b AND b < c)
+{
+    write("a es menor que b y b es menor que c")
+}
 
-#+ TEST PARA LA FUNCION NegativeCalculation *#
+if (NOT a == b)
+{
+    write("a no es igual a b")
+}
+
+#+ CASOS QUE FALLAN EN CONDICIONALES +#
+/*
+if (a < b AND )
+{
+    write("error de condición incompleta")
+}
+
+if (NOT )
+{
+    write("error falta condición luego de NOT")
+}
+
+if a > b
+{
+    write("error falta paréntesis en IF")
+}
+*/
+
+#+ TEST EXTRA PARA BUCLES WHILE +#
+i := 0
+while (i < 10)
+{
+    write(i)
+    i := i + 1
+}
+
+#+ CASOS QUE FALLAN EN WHILE +#
+/*
+while i < 10
+{
+    write(i)
+    i := i + 1
+}
+*/
+
+#+ TEST PARA LA FUNCIÓN REORDER +#
+reorder([x+3, 1+1, 9-x], 1, 2) #+ Caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ Caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) +#
+reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+ Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) +#
+reorder([5+5, 2*3, 9-4], 1, 1) #+ Caso válido invirtiendo elementos +#
+reorder([x, y, z], 0, 2) #+ Caso válido reordenando extremos +#
+
+#+ TESTS FALLIDOS PARA REORDER +#
+/*
+reorder([x+3, 1+1, 9-x], 2, 2) #+ Error: valor booleano no es 0 o 1 +#
+reorder(x+3, 1+1, 9-x, 1, 2) #+ Error: falta corchetes +#
+reorder([x+3, 1+1, 9-x], 1, 2.5) #+ Error: el pivote no es un entero +#
+reorder([], 1, 0) #+ Error: lista vacía +#
+reorder([x+3, 1+1, 9-x], 1) #+ Error: falta parámetro pivote +#
+reorder([5+5, 2*3, 9-4], -1, 1) #+ Error: índice negativo +#
+reorder([5+5, 2*3, 9-4], 1, 5) #+ Error: índice fuera de rango +#
+*/
+
+#+ TEST PARA LA FUNCIÓN NegativeCalculation +#
 a := 4.1
 b := -1.5
 c := 3.0
 
 x := negativeCalculation(-2.0, -4.0, a, b, c) #+ Caso con número negativo par (suma de negativos) +#
-
 
 a := -1.5
 b := 2.5
@@ -107,16 +198,26 @@ d := 5.5
 x := negativeCalculation(3.0, a, b, c, d) #+ Caso con número negativo impar (producto de negativos) +#
 
 x := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
-x := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) *#
+x := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) +#
 
+a := -2.0
+b := -4.0
+c := -6.0
 
+x := negativeCalculation(a, b, c) #+ Caso solo negativos pares (suma de negativos) +#
 
-#+ Test que fallan para probar borrar el caracter de comentario de apertura ("/*") y de cierre del bloque ("*/") +#
+d := 1.0
+e := 2.0
+f := 3.0
 
+x := negativeCalculation(d, e, f) #+ Caso solo positivos +#
+
+#+ TESTS FALLIDOS PARA NegativeCalculation +#
 /*
-    x := negativeCalculation() #+ Caso con lista vacia #+
-    x := negativeCalculation("a", "b", "c") #+ Caso con tipo de dato incorrecto (strings en lugar de floats) +#
-    x := negativeCalculation(4, -3) #+ Casos con valores no flotantes (numeros enteros) +#
-    x := negativeCalculation(4.5, "invalid", -3.0) #+ Caso con listas de floats mezclada con tipos incorrectos +#
+x := negativeCalculation() #+ Error: lista vacía +#
+x := negativeCalculation("a", "b", "c") #+ Error: tipo incorrecto (strings) +#
+x := negativeCalculation(4, -3) #+ Error: valores enteros no flotantes +#
+x := negativeCalculation(4.5, "invalid", -3.0) #+ Error: mezcla tipos incorrectos +#
+x := negativeCalculation(2) #+ Error: valor entero no flotante +#
 */
 
