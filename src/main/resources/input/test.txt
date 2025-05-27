@@ -1,29 +1,44 @@
-c = d * (e - 21) / 4
+#+ BLOQUE DE DECLARACION DE VARIABLES +#
+init {
+    varFloat1, varFloat2, varFloat3, varFloat4, varFloat5 : Float
+    varInt1, varInt2, varInt3, varInt4, varInt5, varInt6, varInt7, varInt8, varInt9, varInt10, varInt11, varInt12, varInt13, varInt14 : Int
+    varStr1 : String
+}
 
-a := 1
-b := 1
-c := 2
+varInt11 := 130814
 
-if (a > b AND c > b)
+varFloat4 := 2
+varInt1 := 4
+varFloat3 = varFloat4 * (varInt1 - 21) / 4
+
+varFloat1 := 1
+varFloat2 := 1
+varFloat3 := 2
+
+if (varFloat1 > varFloat2 AND varFloat3 > varFloat2)
 {
     write("a es más grande que b y c es más grande que b")
 }
 
-x =: 27 - c
-x =: r + 500
-x =: 34 * 3
-x =: z / f
+varInt6 := 10
+varInt7 := 8
+varInt2 := 4
 
-a := 99999.99
-a := 99.
-a := .9999
+varFloat5 =: 27 - varFloat3
+varFloat5 =: varInt6 + 500
+varFloat5 =: 34 * 3
+varFloat5 =: varInt7 / varInt2
 
-b := "@sdADaSjfla%dfg"
-b := "asldk  fh sjf"
+varFloat1 := 99999.99
+varFloat1 := 99.
+varFloat1 := .9999
+
+varStr1 := "@sdADaSjfla%dfg"
+varStr1 := "asldk  fh sjf"
 
 #+ Esto es un comentario +#
 
-if (a > b)
+if (varFloat1 > varFloat2)
 {
     write("a es más grande que b")
 }
@@ -32,52 +47,46 @@ else
     write("a es más chico o igual a b")
 }
 
-init {
-    a1, b1 : Float
-    variable1 : Int
-    p1, p2, p3 : String
-}
+varFloat1 := 1
+varFloat2 := 1
+varFloat3 := 2
 
-a := 1
-b := 1
-c := 2
-
-if (NOT a > b)
+if (NOT varFloat1 > varFloat2)
 {
     write("a no es más grande que b")
 }
 
-a := 1
-b := 1
-c := 2
+varFloat1 := 1
+varFloat2 := 1
+varFloat3 := 2
 
-if (a > b OR c > b)
+if (varFloat1 > varFloat2 OR varFloat3 > varFloat2)
 {
     write("a es más grande que b o c es más grande que b")
 }
 
-read(base) #+ base es una variable +#
+read(varInt13) #+ base es una variable +#
 
-a := 1
-b := 3
+varFloat1 := 1
+varFloat2 := 3
 
-while (a > b)
+while (varFloat1 > varFloat2)
 {
     write("a es más grande que b")
-    a := a + 1
+    varFloat1 := varFloat1 + 1
 }
 
 write("ewr")  #+ “ewr” es una cte string +#
-write(var1)  #+ var1 es una variable numérica definida previamente +#
+write(varInt11)  #+ var1 es una variable numérica definida previamente +#
 
 #+ TEST PARA IF ANIDADOS +#
-a := 5
-b := 3
-c := 7
+varFloat1 := 5
+varFloat2 := 3
+varFloat3 := 7
 
-if (a > b)
+if (varFloat1 > varFloat2)
 {
-    if (c > a)
+    if (varFloat3 > varFloat1)
     {
         write("c es mayor que a, que es mayor que b")
     }
@@ -91,47 +100,51 @@ else
     write("b es mayor o igual a a")
 }
 
-if (a == 5)
+if (varFloat1 == 5)
 {
-    if (b == 3)
+    if (varFloat2 == 3)
     {
-        if (c == 7)
+        if (varFloat3 == 7)
         {
             write("todos los valores coinciden")
         }
     }
 }
 
+varFloat5 := 75
+varInt5 := 8
+varInt7 := 3
+
 #+ TEST EXTRA PARA ASIGNACIONES Y OPERACIONES ARITMÉTICAS +#
-a := (4 + 5) * (7 - 2) / 3
-b := x / (y - z)
-c := (m + n) * (p - q) / (r + s)
+varFloat1 := (4 + 5) * (7 - 2) / 3
+varFloat2 := varFloat5 / (varInt5 - varInt7)
+varFloat3 := (varInt9 + varInt10) * (varInt12 - varInt13) / (varInt6 + varInt14)
 
 #+ CASOS QUE FALLAN EN ASIGNACIONES (AGRUPADOS EN COMENTARIO) (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
-a := (4 + ) * (7 - 2) / 3  #+ Error: operación incompleta +#
-b := x / (y - )  #+ Error: falta operando en resta +#
-c := * (m + n) (p - q)  #+ Error: operador fuera de lugar +#
+varFloat1 := (4 + ) * (7 - 2) / 3  #+ Error: operación incompleta +#
+varFloat2 := varFloat5 / (varInt5 - )  #+ Error: falta operando en resta +#
+varFloat3 := * (varInt9 + varInt10) (varInt12 - varInt13)  #+ Error: operador fuera de lugar +#
 */
 
 #+ TEST EXTRA PARA CONDICIONALES +#
-a := 3
-b := 4
-c := 5
+varFloat1 := 3
+varFloat2 := 4
+varFloat3 := 5
 
-if (a < b AND b < c)
+if (varFloat1 < varFloat2 AND varFloat2 < varFloat3)
 {
     write("a es menor que b y b es menor que c")
 }
 
-if (NOT a == b)
+if (NOT varFloat1 == varFloat2)
 {
     write("a no es igual a b")
 }
 
 #+ CASOS QUE FALLAN EN CONDICIONALES (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
-if (a < b AND )
+if (varFloat1 < varFloat2 AND )
 {
     write("error de condición incompleta")
 }
@@ -141,83 +154,82 @@ if (NOT )
     write("error falta condición luego de NOT")
 }
 
-if a > b
+if varFloat1 > varFloat2
 {
     write("error falta paréntesis en IF")
 }
 */
 
 #+ TEST EXTRA PARA BUCLES WHILE +#
-i := 0
-while (i < 10)
+varInt12 := 0
+while (varInt12 < 10)
 {
-    write(i)
-    i := i + 1
+    write(varInt12)
+    varInt12 := varInt12 + 1
 }
 
 #+ CASOS QUE FALLAN EN WHILE (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
-while i < 10
+while varInt12 < 10
 {
-    write(i)
-    i := i + 1
+    write(varInt12)
+    varInt12 := varInt12 + 1
 }
 */
 
 #+ TEST PARA LA FUNCIÓN REORDER +#
-reorder([x+3, 1+1, 9-x], 1, 2) #+ Caso bien escrito +#
-reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ Caso bien escrito +#
-reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) +#
-reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+ Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) +#
+reorder([varFloat5+3, 1+1, 9-varFloat5], 1, 2) #+ Caso bien escrito +#
+reorder([varInt6*varInt13-2, varFloat5+3, 1+1, 9-varFloat5], 0, 2) #+ Caso bien escrito +#
+reorder([varInt6*varInt13-2, varFloat5+3, 1+1, 9-varFloat5], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) +#
+reorder([varInt6*varInt13-2, varFloat5+3, 1+1, 9-varFloat5], 1, 0) #+ Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) +#
 reorder([5+5, 2*3, 9-4], 1, 1) #+ Caso válido invirtiendo elementos +#
-reorder([x, y, z], 0, 2) #+ Caso válido reordenando extremos +#
+reorder([varFloat5, varInt5, varInt7], 0, 2) #+ Caso válido reordenando extremos +#
 
 #+ TESTS FALLIDOS PARA REORDER (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
 /*
-reorder([x+3, 1+1, 9-x], 2, 2) #+ Error: valor booleano no es 0 o 1 +#
-reorder(x+3, 1+1, 9-x, 1, 2) #+ Error: falta corchetes +#
-reorder([x+3, 1+1, 9-x], 1, 2.5) #+ Error: el pivote no es un entero +#
+reorder([varFloat5+3, 1+1, 9-varFloat5], 2, 2) #+ Error: valor booleano no es 0 o 1 +#
+reorder(varFloat5+3, 1+1, 9-varFloat5, 1, 2) #+ Error: falta corchetes +#
+reorder([varFloat5+3, 1+1, 9-varFloat5], 1, 2.5) #+ Error: el pivote no es un entero +#
 reorder([], 1, 0) #+ Error: lista vacía +#
-reorder([x+3, 1+1, 9-x], 1) #+ Error: falta parámetro pivote +#
+reorder([varFloat5+3, 1+1, 9-varFloat5], 1) #+ Error: falta parámetro pivote +#
 reorder([5+5, 2*3, 9-4], -1, 1) #+ Error: índice negativo +#
 reorder([5+5, 2*3, 9-4], 1, 5) #+ Error: índice fuera de rango +#
 */
 
 #+ TEST PARA LA FUNCIÓN NegativeCalculation +#
-a := 4.1
-b := -1.5
-c := 3.0
+varFloat1 := 4.1
+varFloat2 := -1.5
+varFloat3 := 3.0
 
-x := negativeCalculation(-2.0, -4.0, a, b, c) #+ Caso con número negativo par (suma de negativos) +#
+varFloat5 := negativeCalculation(-2.0, -4.0, varFloat1, varFloat2, varFloat3) #+ Caso con número negativo par (suma de negativos) +#
 
-a := -1.5
-b := 2.5
-c := -3.0
-d := 5.5
+varFloat1 := -1.5
+varFloat2 := 2.5
+varFloat3 := -3.0
+varFloat4 := 5.5
 
-x := negativeCalculation(3.0, a, b, c, d) #+ Caso con número negativo impar (producto de negativos) +#
+varFloat5 := negativeCalculation(3.0, varFloat1, varFloat2, varFloat3, varFloat4) #+ Caso con número negativo impar (producto de negativos) +#
 
-x := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
-x := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) +#
+varFloat5 := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
+varFloat5 := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) +#
 
-a := -2.0
-b := -4.0
-c := -6.0
+varFloat1 := -2.0
+varFloat2 := -4.0
+varFloat3 := -6.0
 
-x := negativeCalculation(a, b, c) #+ Caso solo negativos pares (suma de negativos) +#
+varFloat5 := negativeCalculation(varFloat1, varFloat2, varFloat3) #+ Caso solo negativos pares (suma de negativos) +#
 
-d := 1.0
-e := 2.0
-f := 3.0
+varFloat4 := 1.0
+varFloat5 := 2.0
+varFloat1 := 3.0
 
-x := negativeCalculation(d, e, f) #+ Caso solo positivos +#
+varFloat5 := negativeCalculation(varFloat4, varFloat5, varFloat1) #+ Caso solo positivos +#
 
 #+ TESTS FALLIDOS PARA NegativeCalculation (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/")+#
 /*
-x := negativeCalculation() #+ Error: lista vacía +#
-x := negativeCalculation("a", "b", "c") #+ Error: tipo incorrecto (strings) +#
-x := negativeCalculation(4, -3) #+ Error: valores enteros no flotantes +#
-x := negativeCalculation(4.5, "invalid", -3.0) #+ Error: mezcla tipos incorrectos +#
-x := negativeCalculation(2) #+ Error: valor entero no flotante +#
+varFloat5 := negativeCalculation() #+ Error: lista vacía +#
+varFloat5 := negativeCalculation("a", "b", "c") #+ Error: tipo incorrecto (strings) +#
+varFloat5 := negativeCalculation(4, -3) #+ Error: valores enteros no flotantes +#
+varFloat5 := negativeCalculation(4.5, "invalid", -3.0) #+ Error: mezcla tipos incorrectos +#
+varFloat5 := negativeCalculation(2) #+ Error: valor entero no flotante +#
 */
-
