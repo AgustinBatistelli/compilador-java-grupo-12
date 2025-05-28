@@ -1,2 +1,6 @@
-a=a+b
 a=4/b*d
+b=t+y/8
+c=4+3
+init{
+ a : Float
+}

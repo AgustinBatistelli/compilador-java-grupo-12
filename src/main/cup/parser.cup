@@ -10,6 +10,7 @@ class Parser;
 action code
 {:
     public NodoSintactico nExp,nTerm,nFactor,nAsig;
+    public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
 :}
 // Terminals
 terminal ASSIG;
@@ -85,8 +86,9 @@ start with program;
 
 program ::= sentences
           {:
-              SymbolTableGenerator generator = new SymbolTableGenerator();
-              generator.generate();
+                SymbolTableGenerator generator = new SymbolTableGenerator();
+                generator.generate();
+                gen.generate();
           :};
 
 sentences ::= sentence sentences
@@ -113,16 +115,11 @@ assignment ::= IDENTIFIER:id assign_operator expression {:
 
     // Crear nodo de asignación
     nAsig = NodoSintactico.crearNodo(":=", NodoSintactico.crearHoja(id), nExp);
-
+    gen.addTree(nAsig);
     // Verificación y agregación a tabla de símbolos
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
         SymbolTableGenerator.addVariable(id.toString().trim(), "-");
     }
-
-        IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
-        gen.setRoot(nAsig);
-        gen.generate();
-
 :};
 
 
