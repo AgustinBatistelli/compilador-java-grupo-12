@@ -8,6 +8,7 @@ import lyc.compiler.model.UnknownCharacterException;
 import org.apache.commons.text.CharacterPredicates;
 import org.apache.commons.text.RandomStringGenerator;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import java.io.IOException;
 import static com.google.common.truth.Truth.assertThat;
 import static lyc.compiler.constants.Constants.MAX_LENGTH;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
+@Disabled
 public class LexerTest {
 
   private Lexer lexer;

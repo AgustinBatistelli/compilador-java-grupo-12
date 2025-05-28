@@ -3,10 +3,14 @@ package lyc.compiler;
 import java_cup.runtime.*;
 import lyc.compiler.files.SymbolTableGenerator;
 import java.util.*;
-
+import lyc.compiler.TreeParser.*;
+import lyc.compiler.files.*;
 class Parser;
 
-
+action code
+{:
+    public NodoSintactico nExp,nTerm,nFactor,nAsig;
+:}
 // Terminals
 terminal ASSIG;
 terminal PLUS;
@@ -77,6 +81,8 @@ non terminal float_expression_list;
 // Start Symbol Definition
 start with program;
 
+//
+
 program ::= sentences
           {:
               SymbolTableGenerator generator = new SymbolTableGenerator();
@@ -104,10 +110,21 @@ init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
 // ASSIGNMENT
 assignment ::= IDENTIFIER:id assign_operator expression {:
     System.out.println("Assignment to ID: " + id);
+
+    // Crear nodo de asignación
+    nAsig = NodoSintactico.crearNodo(":=", NodoSintactico.crearHoja(id), nExp);
+
+    // Verificación y agregación a tabla de símbolos
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
         SymbolTableGenerator.addVariable(id.toString().trim(), "-");
     }
+
+        IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
+        gen.setRoot(nAsig);
+        gen.generate();
+
 :};
+
 
 assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
     System.out.println("Assignment result of NegativeCalculation to ID: " + id);
@@ -306,49 +323,49 @@ comparison ::= expression:exp1 {:
     RESULT = exp1;
 :};
 
-expression ::= term:exp {: RESULT = exp; :};
+expression ::= term:exp {: nExp = nTerm; :};
 expression ::=  expression:exp1 PLUS term:exp2 {:
                 System.out.println(exp1 + " + " + exp2);
-                RESULT = exp1 + " + " + exp2;
+                nExp = NodoSintactico.crearNodo("+",(NodoSintactico)nExp,(NodoSintactico)nTerm);
             :};
 expression ::= expression:exp1 SUB term:exp2 {:
                 System.out.println(exp1 + " - " + exp2);
-                RESULT = exp1 + " - " + exp2;
+                nExp = NodoSintactico.crearNodo("-",(NodoSintactico)nExp,(NodoSintactico)nTerm);
                :};
 
-term ::= factor:exp {: RESULT = exp; :};
+term ::= factor:exp {: nTerm = nFactor; :};
 term ::= term:exp1 MULT factor:exp2 {:
             System.out.println(exp1 + " * " + exp2);
-            RESULT = exp1 + " * " + exp2;
+            nTerm = NodoSintactico.crearNodo("*",(NodoSintactico)nTerm,(NodoSintactico)nFactor);
          :};
 term ::= term:exp1 DIV factor:exp2 {:
            System.out.println(exp1 + " / " + exp2);
-           RESULT = exp1 + " / " + exp2;
+           nTerm = NodoSintactico.crearNodo("/",(NodoSintactico)nTerm,(NodoSintactico)nFactor);
          :};
 
-factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); RESULT = id; :};
+factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); nFactor = NodoSintactico.crearHoja(id); :};
 factor ::= INTEGER_CONSTANT:constant {:
             System.out.println("Constant: " + constant);
             String value = constant.toString();
             SymbolTableGenerator.addConstant(value, "int", value);
-            RESULT = value;
+            nFactor = NodoSintactico.crearHoja(constant);
             :};
 
 factor ::= FLOAT_CONSTANT:constant {:
             System.out.println("Constant: " + constant);
             String value = constant.toString();
             SymbolTableGenerator.addConstant(value, "float", value);
-            RESULT = constant;
+            nFactor = NodoSintactico.crearHoja(constant);
             :};
 
 factor ::= STRING_LITERAL:literal {:
             System.out.println("String literal: " + literal);
             String value = literal.toString();
             SymbolTableGenerator.addConstant(value, "string", value);
-            RESULT = literal;
+            nFactor = NodoSintactico.crearHoja(literal);
             :};
 
-factor ::= OPEN_PARENTHESES expression:exp CLOSE_PARENTHESES {: System.out.println("Expression: (" + exp + ")"); RESULT = exp; :};
+factor ::= OPEN_PARENTHESES expression:exp CLOSE_PARENTHESES {: System.out.println("Expression: (" + exp + ")"); nFactor = nExp; :};
 
 bool_expression ::= INTEGER_CONSTANT:integer_constant
         {:
