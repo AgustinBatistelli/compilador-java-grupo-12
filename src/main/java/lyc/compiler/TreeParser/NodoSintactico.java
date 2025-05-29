@@ -34,4 +34,10 @@ public class NodoSintactico {
     public NodoSintactico getDerecho() {
         return derecho;
     }
+
+    public NodoSintactico clonar() {
+        NodoSintactico copiaIzq = (this.izquierdo != null) ? this.izquierdo.clonar() : null;
+        NodoSintactico copiaDer = (this.derecho != null) ? this.derecho.clonar() : null;
+        return new NodoSintactico(this.valor, copiaIzq, copiaDer);
+    }
 }

@@ -9,8 +9,9 @@ class Parser;
 
 action code
 {:
-    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit;
+    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS;
     public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
+    public ArrayList<String> listaIds;
 :}
 // Terminals
 terminal ASSIG;
@@ -65,13 +66,13 @@ non terminal NodoSintactico expression;
 non terminal NodoSintactico comparison;
 non terminal NodoSintactico term;
 non terminal NodoSintactico factor;
-non terminal  init_block;
-non terminal  variable_declaration;
-non terminal  variable_declaration_list;
-non terminal  identifier_list;
+non terminal  NodoSintactico init_block;
+non terminal NodoSintactico variable_declaration;
+non terminal NodoSintactico variable_declaration_list;
+non terminal NodoSintactico identifier_list;
 non terminal  type;
 non terminal  assign_operator;
-non terminal  reorder_stmt;
+non terminal  NodoSintactico reorder_stmt;
 non terminal  reorder_list;
 non terminal  reorder_list_elements;
 non terminal  bool_expression;
@@ -106,19 +107,20 @@ sentences ::= sentence:snt sentences:rest
 sentence ::= assignment {: nSentence=nAsig; RESULT=nSentence; :}
            | if_stmt {: nSentence=nIf; RESULT=nSentence; :}
            | while_loop {: nSentence=nWhile; RESULT=nSentence; :}
-           | init_block
+           | init_block {: nSentence = nInit; RESULT=nSentence; :}
            | read_stmt {: nSentence = nRead; RESULT=nSentence; :}
            | write_stmt {: nSentence=nWrite; RESULT=nSentence; :}
-           | reorder_stmt
+           | reorder_stmt {: nSentence = nReorderStatement; RESULT=nSentence; :}
            | negative_calculation_stmt
+           | identifier_list {: nSentence = nListId; RESULT=nSentence; :}
            | COMMENT
            ;
 
 
 init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
              {: System.out.println("Initialization block");
-                //nInit=NodoSintactico.crearNodo();
-                //RESULT=nInit;
+                nInit=NodoSintactico.crearNodo("INIT",nVarListS,null);
+                RESULT=nInit;
              :};
 
 // ASSIGNMENT
@@ -192,13 +194,15 @@ reorder_stmt ::= REORDER OPEN_PARENTHESES OPEN_BRACKET reorder_list:list CLOSE_B
                   System.out.println("Lista de elementos: " + list);
                   System.out.println("Valor de BOOL: " + bool);
                   System.out.println("Valor de INTEGER_CONSTANT: " + int_const);
-                  RESULT = "reorder(" + list + "," + bool + "," + int_const + ")";
+                  nReorderStatement = NodoSintactico.crearNodo("REORDER",NodoSintactico.crearNodo("PARAMS",nReorderL,NodoSintactico.crearNodo("PARAMS",nBoolExp,NodoSintactico.crearHoja(int_const))),null);
+                  RESULT = nReorderStatement;
                 :};
 
 
 reorder_list ::= reorder_list_elements:list
                {:
                     System.out.println("Lista de elementos procesados: " + list);
+                    nReorderL = nReorderLE;
                     RESULT = list;
                     System.out.println("Resultado final de la lista: " + RESULT);
 
@@ -208,11 +212,13 @@ reorder_list ::= reorder_list_elements:list
 reorder_list_elements ::= expression:exp
                         {:
                             System.out.println("Elemento agregado: " + exp);
+                            nReorderLE=exp;
                             RESULT = exp;
                         :}
                         | expression:exp COMMA reorder_list_elements:list
                         {:
                             System.out.println("Sumando: " + exp + " A lista: " + list);
+                            nReorderLE=NodoSintactico.crearNodo(",",exp,nReorderLE);
                             RESULT = exp + ", " + list;
                         :};
 
@@ -244,32 +250,40 @@ float_expression_list ::= IDENTIFIER:id COMMA float_expression_list:list
                         :};
 
 
-variable_declaration_list ::= variable_declaration variable_declaration_list | COMMENT variable_declaration_list | ;
-
+variable_declaration_list ::= variable_declaration:v variable_declaration_list:vl {: nVarListS = NodoSintactico.crearNodo("L",v,vl); RESULT=nVarListS; :};
+//variable_declaration_list ::= COMMENT variable_declaration_list:vl {: nVarListS=vl; RESULT=nVarListS; :};
+variable_declaration_list ::= variable_declaration  {: nVarListS = nVarList; RESULT = nVarList; :};
 variable_declaration ::= identifier_list:list COLON type:type {:
     System.out.println("[Var Declaration] " + list + " : " + type);
-    for (String id : (ArrayList<String>) list) {
+    for (String id : (ArrayList<String>) listaIds) {
         id = id.trim();
         if (!SymbolTableGenerator.isVariableDefined(id)) {
             SymbolTableGenerator.addVariable(id, type.toString());
         }
     }
+    nVarList= NodoSintactico.crearNodo(":",list,NodoSintactico.crearHoja(type.toString()));
+    RESULT=nVarList;
 :};
 
 
-identifier_list ::= IDENTIFIER:id {:
+identifier_list ::= IDENTIFIER:id
+{:
     System.out.println("Id: " + id);
-    List<String> ids = new ArrayList<>();
-    ids.add(id.toString().trim());
-
-
-    RESULT = ids;
+    listaIds = new ArrayList<>();
+    listaIds.add(id.toString().trim());
+    nListId = NodoSintactico.crearHoja(id);
+    RESULT = nListId;
 :};
 
-identifier_list ::= identifier_list:list COMMA IDENTIFIER:id {:
+
+identifier_list ::= identifier_list:list COMMA IDENTIFIER:id
+{:
     System.out.println("List: " + list + ", ID: " + id);
-    ((List<String>) list).add(id.toString().trim());
-    RESULT = list;
+    ((List<String>) listaIds).add(id.toString().trim());
+
+    nListId = NodoSintactico.crearNodo(",", list, NodoSintactico.crearHoja(id));
+
+    RESULT = nListId;
 :};
 
 type ::= FLOAT_TYPE {: System.out.println("Float"); RESULT = "float"; :}
@@ -414,5 +428,6 @@ bool_expression ::= INTEGER_CONSTANT:integer_constant
           if (!integer_constant.equals("0") && !integer_constant.equals("1")) {
             throw new Exception("Invalid boolean constant: " + integer_constant);
           }
+          nBoolExp = NodoSintactico.crearHoja(integer_constant);
           RESULT = integer_constant;
         :};
