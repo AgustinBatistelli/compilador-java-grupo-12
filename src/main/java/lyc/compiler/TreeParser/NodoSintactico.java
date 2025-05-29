@@ -34,8 +34,4 @@ public class NodoSintactico {
     public NodoSintactico getDerecho() {
         return derecho;
     }
-
-    public boolean esHoja() {
-        return izquierdo == null && derecho == null;
-    }
 }

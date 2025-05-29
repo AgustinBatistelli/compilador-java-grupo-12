@@ -1,6 +1,17 @@
-a=4/b*d
-b=t+y/8
-c=4+3
-init{
- a : Float
+if (varFloat1 == 5)
+{
+    if (varFloat2 == 3)
+    {
+        if (varFloat3 == 7)
+        {
+            a=2
+        }
+    }
+}
+
+while (varFloat1 > varFloat2)
+{
+    varFloat1 := varFloat1 + 1
+    i := i + 1
+    a := 2 + 1
 }
