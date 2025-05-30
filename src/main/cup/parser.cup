@@ -237,39 +237,34 @@ negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expres
 
 float_expression_list ::= FLOAT_CONSTANT:exp
                         {:
-                            // Crear una lista para almacenar la expresión
                             List<String> expList = new ArrayList<>();
-                            expList.add(exp.toString());  // Añadir el valor de exp a la lista
+                            expList.add(exp.toString());
                             RESULT = expList;
                         :};
 
 float_expression_list ::= IDENTIFIER:id
                         {:
-                            // Crear una lista para almacenar la expresión
                             List<String> expList = new ArrayList<>();
-                            expList.add(id.toString());  // Añadir el valor de id a la lista
+                            expList.add(id.toString());
                             RESULT = expList;
                         :};
 
 float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list
                         {:
-                            // Acumular los elementos de la lista
-                            List<String> expList = (List<String>) list;  // Convertimos 'list' en una lista
-                            expList.add(exp.toString());  // Añadir el valor de exp a la lista
-                            RESULT = expList;  // Retornamos la lista acumulada
+                            List<String> expList = (List<String>) list;
+                            expList.add(exp.toString());
+                            RESULT = expList;
                         :};
 
 float_expression_list ::= IDENTIFIER:id COMMA float_expression_list:list
                         {:
-                            // Acumular los elementos de la lista
-                            List<String> expList = (List<String>) list;  // Convertimos 'list' en una lista
-                            expList.add(id.toString());  // Añadir el valor de id a la lista
-                            RESULT = expList;  // Retornamos la lista acumulada
+                            List<String> expList = (List<String>) list;
+                            expList.add(id.toString());
+                            RESULT = expList;
                         :};
 
 
 variable_declaration_list ::= variable_declaration:v variable_declaration_list:vl {: nVarListS = NodoSintactico.crearNodo("L",v,vl); RESULT=nVarListS; :};
-//variable_declaration_list ::= COMMENT variable_declaration_list:vl {: nVarListS=vl; RESULT=nVarListS; :};
 variable_declaration_list ::= variable_declaration  {: nVarListS = nVarList; RESULT = nVarList; :};
 variable_declaration ::= identifier_list:list COLON type:type {:
     System.out.println("[Var Declaration] " + list + " : " + type);
