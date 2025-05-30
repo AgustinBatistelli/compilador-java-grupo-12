@@ -23,18 +23,6 @@ public class IntermediateCodeGenerator implements FileGenerator {
 
     @Override
     public void generate() {
-        File outputDir = new File("target/output");
-        if (!outputDir.exists()) {
-            outputDir.mkdirs();
-        }
-
-        File intermidiateCodeFile = new File(outputDir, "intermidiate-code.txt");
-
-        try (FileWriter fileWriter = new FileWriter(intermidiateCodeFile)) {
-            generate(fileWriter);
-        } catch (IOException e) {
-            System.err.println("Error writing intermediate code: " + e.getMessage());
-        }
     }
 
     @Override
