@@ -1,5 +1,7 @@
 package lyc.compiler.TreeParser;
 
+import java.util.List;
+
 public class NodoSintactico {
     private String valor;
     private NodoSintactico izquierdo;
@@ -39,5 +41,27 @@ public class NodoSintactico {
         NodoSintactico copiaIzq = (this.izquierdo != null) ? this.izquierdo.clonar() : null;
         NodoSintactico copiaDer = (this.derecho != null) ? this.derecho.clonar() : null;
         return new NodoSintactico(this.valor, copiaIzq, copiaDer);
+    }
+
+    public void setIzquierdo(NodoSintactico izq) {
+        this.izquierdo = izq;
+    }
+
+    public void setDerecho(NodoSintactico der) {
+        this.derecho = der;
+    }
+
+    public static NodoSintactico createBalancedTree(List<String> expList) {
+            if (expList.size() == 1) {
+                return NodoSintactico.crearHoja(expList.get(0));
+            }
+
+            NodoSintactico root = NodoSintactico.crearNodo(",", null, null);
+
+            int mid = expList.size() / 2;
+            root.setIzquierdo(createBalancedTree(expList.subList(0, mid)));
+            root.setDerecho(createBalancedTree(expList.subList(mid, expList.size())));
+
+            return root;
     }
 }

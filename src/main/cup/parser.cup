@@ -9,7 +9,7 @@ class Parser;
 
 action code
 {:
-    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS;
+    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS, nNegativeCalculation;
     public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
     public ArrayList<String> listaIds;
 :}
@@ -111,7 +111,6 @@ sentence ::= assignment {: nSentence=nAsig; RESULT=nSentence; :}
            | read_stmt {: nSentence = nRead; RESULT=nSentence; :}
            | write_stmt {: nSentence=nWrite; RESULT=nSentence; :}
            | reorder_stmt {: nSentence = nReorderStatement; RESULT=nSentence; :}
-           | negative_calculation_stmt
            | identifier_list {: nSentence = nListId; RESULT=nSentence; :}
            | COMMENT
            ;
@@ -137,6 +136,8 @@ assignment ::= IDENTIFIER:id assign_operator expression {:
 
 
 assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
+    nAsig = NodoSintactico.crearNodo("=", NodoSintactico.crearHoja(id), nNegativeCalculation);
+
     System.out.println("Assignment result of NegativeCalculation to ID: " + id);
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
         SymbolTableGenerator.addVariable(id.toString().trim(), "-");
@@ -222,31 +223,48 @@ reorder_list_elements ::= expression:exp
                             RESULT = exp + ", " + list;
                         :};
 
-negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expression_list:exps CLOSE_PARENTHESES
+negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expression_list:exp CLOSE_PARENTHESES
                 {:
-                    System.out.println("Negative Calculation detectada con expresiones: " + exps);
-                    RESULT = "negativeCalculation(" + exps + ")";
+                    List<String> expList = (List<String>) exp;
+
+                    nNegativeCalculation = NodoSintactico.crearNodo("negativeCalculation", null, null);
+
+                    nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTree(expList.subList(0, expList.size() / 2)));
+                    nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTree(expList.subList(expList.size() / 2, expList.size())));
+
+                    RESULT = nNegativeCalculation;
                 :};
 
 float_expression_list ::= FLOAT_CONSTANT:exp
                         {:
-                            System.out.println("Elemento agregado: " + exp);
-                            RESULT = exp;
+                            // Crear una lista para almacenar la expresión
+                            List<String> expList = new ArrayList<>();
+                            expList.add(exp.toString());  // Añadir el valor de exp a la lista
+                            RESULT = expList;
                         :};
+
 float_expression_list ::= IDENTIFIER:id
                         {:
-                            System.out.println("Elemento agregado: " + id);
-                            RESULT = id;
+                            // Crear una lista para almacenar la expresión
+                            List<String> expList = new ArrayList<>();
+                            expList.add(id.toString());  // Añadir el valor de id a la lista
+                            RESULT = expList;
                         :};
+
 float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list
                         {:
-                            System.out.println("Sumando FLOAT: " + exp + " A lista: " + list);
-                            RESULT = exp + ", " + list;
+                            // Acumular los elementos de la lista
+                            List<String> expList = (List<String>) list;  // Convertimos 'list' en una lista
+                            expList.add(exp.toString());  // Añadir el valor de exp a la lista
+                            RESULT = expList;  // Retornamos la lista acumulada
                         :};
+
 float_expression_list ::= IDENTIFIER:id COMMA float_expression_list:list
                         {:
-                            System.out.println("Sumando ID: " + id + " A lista: " + list);
-                            RESULT = id + ", " + list;
+                            // Acumular los elementos de la lista
+                            List<String> expList = (List<String>) list;  // Convertimos 'list' en una lista
+                            expList.add(id.toString());  // Añadir el valor de id a la lista
+                            RESULT = expList;  // Retornamos la lista acumulada
                         :};
 
 
