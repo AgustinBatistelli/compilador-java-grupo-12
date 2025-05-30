@@ -229,8 +229,8 @@ negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expres
 
                     nNegativeCalculation = NodoSintactico.crearNodo("negativeCalculation", null, null);
 
-                    nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTree(expList.subList(0, expList.size() / 2)));
-                    nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTree(expList.subList(expList.size() / 2, expList.size())));
+                    nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTreeIterative(expList.subList(0, expList.size() / 2)));
+                    nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTreeIterative(expList.subList(expList.size() / 2, expList.size())));
 
                     RESULT = nNegativeCalculation;
                 :};

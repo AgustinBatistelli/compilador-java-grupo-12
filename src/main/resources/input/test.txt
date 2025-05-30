@@ -195,3 +195,41 @@ reorder([varFloat5+3, 1+1, 9-varFloat5], 1) #+ Error: falta parámetro pivote +#
 reorder([5+5, 2*3, 9-4], -1, 1) #+ Error: índice negativo +#
 reorder([5+5, 2*3, 9-4], 1, 5) #+ Error: índice fuera de rango +#
 */
+
+#+ TEST PARA LA FUNCIÓN NegativeCalculation +#
+varFloat1 := 4.1
+varFloat2 := -1.5
+varFloat3 := 3.0
+
+varFloat5 := negativeCalculation(-2.0, -4.0, varFloat1, varFloat2, varFloat3) #+ Caso con número negativo par (suma de negativos) +#
+
+varFloat1 := -1.5
+varFloat2 := 2.5
+varFloat3 := -3.0
+varFloat4 := 5.5
+
+varFloat5 := negativeCalculation(3.0, varFloat1, varFloat2, varFloat3, varFloat4) #+ Caso con número negativo impar (producto de negativos) +#
+
+varFloat5 := negativeCalculation(1.5, 3.0, 5.5) #+ Caso sin números negativos +#
+varFloat5 := negativeCalculation(-3.5) #+ Caso con un solo valor negativo (impar) +#
+
+varFloat1 := -2.0
+varFloat2 := -4.0
+varFloat3 := -6.0
+
+varFloat5 := negativeCalculation(varFloat1, varFloat2, varFloat3) #+ Caso solo negativos pares (suma de negativos) +#
+
+varFloat4 := 1.0
+varFloat5 := 2.0
+varFloat1 := 3.0
+
+varFloat5 := negativeCalculation(varFloat4, varFloat5, varFloat1) #+ Caso solo positivos +#
+
+#+ TESTS FALLIDOS PARA NegativeCalculation (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/")+#
+/*
+varFloat5 := negativeCalculation() #+ Error: lista vacía +#
+varFloat5 := negativeCalculation("a", "b", "c") #+ Error: tipo incorrecto (strings) +#
+varFloat5 := negativeCalculation(4, -3) #+ Error: valores enteros no flotantes +#
+varFloat5 := negativeCalculation(4.5, "invalid", -3.0) #+ Error: mezcla tipos incorrectos +#
+varFloat5 := negativeCalculation(2) #+ Error: valor entero no flotante +#
+*/

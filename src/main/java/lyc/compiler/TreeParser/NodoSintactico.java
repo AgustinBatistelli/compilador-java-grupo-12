@@ -1,6 +1,8 @@
 package lyc.compiler.TreeParser;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 public class NodoSintactico {
     private String valor;
@@ -45,17 +47,26 @@ public class NodoSintactico {
         this.derecho = der;
     }
 
-    public static NodoSintactico createBalancedTree(List<String> expList) {
-            if (expList.size() == 1) {
-                return NodoSintactico.crearHoja(expList.get(0));
-            }
+    public static NodoSintactico createBalancedTreeIterative(List<String> list) {
+        if (list.isEmpty()) return null;
 
-            NodoSintactico root = NodoSintactico.crearNodo(",", null, null);
+        Queue<NodoSintactico> queue = new LinkedList<>();
+        for (String s : list) {
+            queue.add(new NodoSintactico(s));
+        }
 
-            int mid = expList.size() / 2;
-            root.setIzquierdo(createBalancedTree(expList.subList(0, mid)));
-            root.setDerecho(createBalancedTree(expList.subList(mid, expList.size())));
+        while (queue.size() > 1) {
+            NodoSintactico left = queue.poll();
+            NodoSintactico right = queue.poll();
 
-            return root;
+            NodoSintactico parent = new NodoSintactico(",");
+            parent.setIzquierdo(left);
+            parent.setDerecho(right);
+
+            queue.add(parent);
+        }
+
+        return queue.poll();
     }
+
 }
