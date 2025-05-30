@@ -5,6 +5,8 @@ import java.io.IOException;
 
 public interface FileGenerator {
 
+    void generate();
+
     void generate(FileWriter fileWriter) throws IOException;
 
 }
