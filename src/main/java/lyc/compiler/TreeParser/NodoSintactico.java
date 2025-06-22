@@ -69,4 +69,8 @@ public class NodoSintactico {
         return queue.poll();
     }
 
+    public boolean esHoja() {
+        return this.izquierdo == null && this.derecho == null;
+    }
+
 }

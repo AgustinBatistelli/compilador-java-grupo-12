@@ -122,23 +122,19 @@ ValidCommentChar   = [a-zA-Z0-9 \t\f\r\n.,;:\-*/=!<>()\[\]{}\"'“”_áéíóú
   . { throw new UnknownCharacterException(yytext()); }
 }
 
-/* ===== Comentario #+ ... +# ===== */
 <COMMENT_BLOCK> {
-  // Secuencia inválida como + seguido de algo que no es #
-  "+" {
-    int next = yycharat(1);
-    if (next == '#') {
-      yybegin(YYINITIAL);
-      return symbol(ParserSym.COMMENT);
-    }
+
+  "+#" {
+    yybegin(YYINITIAL);
+    return symbol(ParserSym.COMMENT);
   }
 
-  // Caracteres válidos (comentario normal)
-  {ValidCommentChar}+ { /* OK */ }
+  {ValidCommentChar} { /* válido */ }
 
-  {WhiteSpace} { /* OK */ }
+  {WhiteSpace} { /* válido */ }
 
-  // Cualquier otro carácter inválido
-  . { throw new UnknownCharacterException("Carácter inválido en comentario: " + yytext()); }
+  . {
+    throw new UnknownCharacterException("Carácter inválido en comentario: " + yytext());
+  }
 }
 

@@ -83,14 +83,13 @@ non terminal  float_expression_list;
 // Start Symbol Definition
 start with program;
 
-//
-
 program ::= sentences
           {:
                 SymbolTableGenerator generator = new SymbolTableGenerator();
                 generator.generate();
                 gen.addTree(nSentences);
                 gen.generate();
+                gen.generateAssembler();
           :};
 sentences ::= sentence:snt
     {:
