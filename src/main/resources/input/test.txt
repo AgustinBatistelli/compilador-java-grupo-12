@@ -1,23 +1,6 @@
-#+ BLOQUE DE DECLARACION DE VARIABLES +#
 init {
-    varFloat1, varFloat2, varFloat3, varFloat4, varFloat5 : Float
-    varInt1, varInt2, varInt3, varInt4, varInt5, varInt6, varInt7, varInt8, varInt9, varInt10, varInt11, varInt12, varInt13, varInt14 : Int
-    varStr1 : String
+    x : Int
 }
-varInt11 := 130814
 
-if (varFloat1 > varFloat2)
-{
-    if (varFloat3 < varFloat1)
-    {
-        write("c es mayor que a, que es mayor que b")
-    }
-    else
-    {
-        write(varStr1)
-    }
-}
-else
-{
-    write(varInt11)
-}
+
+reorder([x+3, 1+1, 9-x],1,2)

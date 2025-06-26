@@ -90,6 +90,9 @@ public class AsmCodeGenerator implements FileGenerator {
             case "WRITE":
                 generarWrite(nodo);
                 break;
+            case "REORDER":
+                generarReorder(nodo);
+                break;
            default:
                 break;
         }
@@ -249,5 +252,25 @@ public class AsmCodeGenerator implements FileGenerator {
         instruccionesAssembler.add(etiquetaFin + ":");
     }
 
+    private void generarReorder(NodoSintactico nodo) {
+        List<NodoSintactico> expresiones = new ArrayList<>();
+        extraerExpresionesNodo(nodo.getIzquierdo(), expresiones);
 
+        for (NodoSintactico expr : expresiones) {
+            generarExpresion(expr);
+            instruccionesAssembler.add("");
+        }
+
+    }
+
+    private void extraerExpresionesNodo(NodoSintactico nodo, List<NodoSintactico> lista) {
+        if (nodo == null) return;
+
+        if (".".equals(nodo.getValor()) || ",".equals(nodo.getValor())) {
+            extraerExpresionesNodo(nodo.getIzquierdo(), lista);
+            extraerExpresionesNodo(nodo.getDerecho(), lista);
+        } else {
+            lista.add(nodo);
+        }
+    }
 }

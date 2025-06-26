@@ -214,12 +214,48 @@ read_stmt ::= READ OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
 // Reorder
 reorder_stmt ::= REORDER OPEN_PARENTHESES OPEN_BRACKET reorder_list:list CLOSE_BRACKET COMMA bool_expression:bool COMMA INTEGER_CONSTANT:int_const CLOSE_PARENTHESES
                 {:
-                  System.out.println("Reorder statement detectada.");
-                  System.out.println("Lista de elementos: " + list);
-                  System.out.println("Valor de BOOL: " + bool);
-                  System.out.println("Valor de INTEGER_CONSTANT: " + int_const);
-                  nReorderStatement = NodoSintactico.crearNodo("REORDER",NodoSintactico.crearNodo("PARAMS",nReorderL,NodoSintactico.crearNodo("PARAMS",nBoolExp,NodoSintactico.crearHoja(int_const))),null);
-                  RESULT = nReorderStatement;
+                       List<NodoSintactico> originalList = NodoSintactico.procesarListaExpresiones(nReorderL);
+                         int pivot = Integer.parseInt(int_const.toString());
+                         int boolVal = Integer.parseInt(nBoolExp.getValor());
+
+                         List<NodoSintactico> finalList = new ArrayList<>(originalList);
+
+                         if (pivot >= 0 && pivot < originalList.size()) {
+                             if (boolVal == 1 && pivot > 0) {
+                                 List<NodoSintactico> left = new ArrayList<>(originalList.subList(0, pivot));
+                                 Collections.reverse(left);
+
+                                 finalList.clear();
+                                 finalList.add(originalList.get(originalList.size() - 1));
+                                 finalList.addAll(left);
+                             } else if (boolVal == 0 && pivot < originalList.size() - 1) {
+                                 List<NodoSintactico> right = new ArrayList<>(originalList.subList(pivot + 1, originalList.size()));
+                                 Collections.reverse(right);
+
+                                 finalList.clear();
+                                 finalList.addAll(originalList.subList(0, pivot + 1));
+                                 finalList.addAll(right);
+                             } else {
+                                 System.out.println("No se reordenó: no hay elementos del lado seleccionado");
+                             }
+                         } else {
+                             System.out.println("Error: el pivote excede la cantidad de expresiones");
+                         }
+                         System.out.print("Lista final: ");
+                         for (NodoSintactico nodo : finalList) {
+                             System.out.print(NodoSintactico.imprimirExpresion(nodo) + " ");
+                         }
+                         System.out.println();
+
+                         NodoSintactico listaReordenada = null;
+                         for (int i = finalList.size() - 1; i >= 0; i--) {
+                             listaReordenada = (listaReordenada == null)
+                                 ? finalList.get(i)
+                                 : NodoSintactico.crearNodo(",", finalList.get(i), listaReordenada);
+                         }
+
+                         nReorderStatement = NodoSintactico.crearNodo("REORDER", listaReordenada, null);
+                         RESULT = nReorderStatement;
                 :};
 
 
