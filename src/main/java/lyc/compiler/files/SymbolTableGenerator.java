@@ -3,7 +3,9 @@ package lyc.compiler.files;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SymbolTableGenerator implements FileGenerator {
@@ -95,4 +97,41 @@ public class SymbolTableGenerator implements FileGenerator {
 
         return length;
     }
+
+
+    public static List<String> generarSeccionData() {
+        List<String> seccionData = new ArrayList<>();
+        seccionData.add(".data");
+
+        for (Map.Entry<String, Constant> entry : table.entrySet()) {
+            String id = entry.getKey();
+            Constant cte = entry.getValue();
+
+            String tipo = cte.type.toLowerCase();
+            String linea="";
+
+            switch (tipo) {
+                case "int", "float":
+                    if (cte.length > 0)
+                    {
+                        linea = "_cte" + id + " dd " + cte.value;
+                    }
+                    else
+                    {
+                        linea = id + " dd ?";
+                    }
+                    break;
+                case "string":
+                    linea = id + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                    break;
+                default:
+                    break;
+            }
+
+            seccionData.add("    " + linea);
+        }
+
+        return seccionData;
+    }
+
 }

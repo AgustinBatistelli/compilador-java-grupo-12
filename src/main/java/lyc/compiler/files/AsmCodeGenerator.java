@@ -4,6 +4,7 @@ import lyc.compiler.TreeParser.NodoSintactico;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +33,15 @@ public class AsmCodeGenerator implements FileGenerator {
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
+        List <String> variables = new ArrayList<>();
         fileWriter.write(".model small\n");
         fileWriter.write(".stack 100h\n");
         fileWriter.write(".data\n");
-        fileWriter.write("    ; ← Acá van tus variables y constantes\n\n");
+        variables.addAll(SymbolTableGenerator.generarSeccionData());
+        for (String variable : variables)
+        {
+            fileWriter.write(variable + "\n");
+        }
         fileWriter.write(".code\n");
         fileWriter.write("start:\n");
         generateAssembler();
@@ -118,8 +124,18 @@ public class AsmCodeGenerator implements FileGenerator {
                 break;
             default:
                 // Es un número o identificador
-                instruccionesAssembler.add("FLD " + etiqueta);
+                instruccionesAssembler.add("FLD " + (esNumero(etiqueta)?"_cte"+etiqueta:etiqueta));
                 break;
+        }
+    }
+
+    public boolean esNumero(String str) {
+        if (str == null || str.trim().isEmpty()) return false;
+        try {
+            new BigDecimal(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
