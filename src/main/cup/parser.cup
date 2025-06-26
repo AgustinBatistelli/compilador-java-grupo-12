@@ -5,6 +5,7 @@ import lyc.compiler.files.SymbolTableGenerator;
 import java.util.*;
 import lyc.compiler.TreeParser.*;
 import lyc.compiler.files.*;
+import lyc.compiler.model.*;
 class Parser;
 
 action code
@@ -12,6 +13,7 @@ action code
     public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS, nNegativeCalculation;
     public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
     public ArrayList<String> listaIds;
+    public String tipoExpresion,tipoFactor,tipoTermino;
 :}
 // Terminals
 terminal ASSIG;
@@ -111,7 +113,7 @@ sentence ::= assignment {: nSentence=nAsig; RESULT=nSentence; :}
            | write_stmt {: nSentence=nWrite; RESULT=nSentence; :}
            | reorder_stmt {: nSentence = nReorderStatement; RESULT=nSentence; :}
            | identifier_list {: nSentence = nListId; RESULT=nSentence; :}
-           | COMMENT
+           | COMMENT {: System.out.println("comentario"); :}
            ;
 
 
@@ -124,23 +126,31 @@ init_block ::= INIT OPEN_BRACE variable_declaration_list CLOSE_BRACE
 // ASSIGNMENT
 assignment ::= IDENTIFIER:id assign_operator expression {:
     System.out.println("Assignment to ID: " + id);
-
-    // Crear nodo de asignación
-    nAsig = NodoSintactico.crearNodo(":=", NodoSintactico.crearHoja(id), nExp);
     // Verificación y agregación a tabla de símbolos
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
-        SymbolTableGenerator.addVariable(id.toString().trim(), "-");
+        throw new UndeclaredVariableException("ERROR semantico: la variable '" + id.toString() + "' no fue declarada pero esta siendo usada");
     }
+    String tipo = SymbolTableGenerator.getTipo(id.toString());
+    if(tipo == "float" && tipoExpresion== "int")
+        tipoExpresion="float";
+    if(tipo != tipoExpresion)
+    {
+        throw new InvalidAssigmentException ("ERROR semantico: no se puede asignar expresion de tipo " + tipoExpresion + " a variable '" + id + "' de tipo " + tipo);
+    }
+
+    nAsig = NodoSintactico.crearNodo(":=", NodoSintactico.crearHoja(id), nExp);
+
 :};
 
 
 assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
+    if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+        throw new UndeclaredVariableException("ERROR semantico: la variable '" + id.toString() + "' no fue declarada pero esta siendo usada");
+    }
     nAsig = NodoSintactico.crearNodo("=", NodoSintactico.crearHoja(id), nNegativeCalculation);
 
     System.out.println("Assignment result of NegativeCalculation to ID: " + id);
-    if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
-        SymbolTableGenerator.addVariable(id.toString().trim(), "-");
-    }
+
 :};
 
 assign_operator ::= ASSIGNATION
@@ -171,6 +181,10 @@ write_stmt ::= WRITE OPEN_PARENTHESES STRING_LITERAL:str CLOSE_PARENTHESES
 write_stmt ::= WRITE OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
             {:
                 System.out.println("Write statement with variable: " + id);
+                if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+                    throw new UndeclaredVariableException("ERROR semantico: la variable '" + id + "' no fue declarada.");
+                }
+
                 nWrite=NodoSintactico.crearNodo("WRITE",NodoSintactico.crearHoja(id),null);
                 RESULT = nWrite;
             :};
@@ -183,6 +197,10 @@ while_loop ::= WHILE OPEN_PARENTHESES comparison:cmp CLOSE_PARENTHESES OPEN_BRAC
 read_stmt ::= READ OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
             {:
                 System.out.println("Read statement with variable: "+ id);
+                if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+                    throw new UndeclaredVariableException("ERROR semantico: la variable '" + id + "' no fue declarada.");
+                }
+
                 nRead=NodoSintactico.crearNodo("READ",NodoSintactico.crearHoja(id),null);
                 RESULT = nRead;
             :};
@@ -269,9 +287,10 @@ variable_declaration ::= identifier_list:list COLON type:type {:
     System.out.println("[Var Declaration] " + list + " : " + type);
     for (String id : (ArrayList<String>) listaIds) {
         id = id.trim();
-        if (!SymbolTableGenerator.isVariableDefined(id)) {
-            SymbolTableGenerator.addVariable(id, type.toString());
+        if (SymbolTableGenerator.isVariableDefined(id)) {
+            throw new DuplicatedVariableException("ERROR semantico: la variable '" + id + "' ya fue declarada.");
         }
+        SymbolTableGenerator.addVariable(id, type.toString());
     }
     nVarList= NodoSintactico.crearNodo(":",list,NodoSintactico.crearHoja(type.toString()));
     RESULT=nVarList;
@@ -381,39 +400,65 @@ comparison ::= expression:exp1 {:
 :};
 
 expression ::= term:exp {: nExp = nTerm;
+                            tipoExpresion=tipoTermino;
                             RESULT = nExp;
                          :};
 expression ::=  expression:exp1 PLUS term:exp2 {:
                 System.out.println(exp1 + " + " + exp2);
+                if(tipoExpresion=="int"&& tipoTermino=="float")
+                    tipoExpresion="float";
+                if((tipoExpresion == "string" && tipoTermino != "string") || (tipoExpresion != "string" && tipoTermino == "string"))
+                {
+                    throw  new InvalidAssigmentException("no podes sumar una string con algo que no es string");
+                }
                 nExp = NodoSintactico.crearNodo("+",(NodoSintactico)nExp,(NodoSintactico)nTerm);
                 RESULT = nExp;
             :};
 expression ::= expression:exp1 SUB term:exp2 {:
                 System.out.println(exp1 + " - " + exp2);
+                if(tipoExpresion=="int"&& tipoTermino=="float")
+                    tipoExpresion="float";
+                if(tipoExpresion == "string" && tipoTermino != "string")
+                {
+                    throw  new InvalidAssigmentException("no podes restar una string con algo que no es string");
+                }
                 nExp = NodoSintactico.crearNodo("-",(NodoSintactico)nExp,(NodoSintactico)nTerm);
                 RESULT = nExp;
                :};
 
 term ::= factor:exp {: nTerm = nFactor;
+                        tipoTermino = tipoFactor;
                         RESULT = nTerm;
                     :};
 term ::= term:exp1 MULT factor:exp2 {:
             System.out.println(exp1 + " * " + exp2);
+            if(tipoFactor=="float"&&tipoTermino=="int")
+                tipoTermino="float";
+            if(tipoFactor=="string" || tipoTermino=="string")
+                throw new InvalidAssigmentException("no podes multiplicar strings");
             nTerm = NodoSintactico.crearNodo("*",(NodoSintactico)nTerm,(NodoSintactico)nFactor);
             RESULT = nTerm;
          :};
 term ::= term:exp1 DIV factor:exp2 {:
            System.out.println(exp1 + " / " + exp2);
+           if(tipoFactor=="float"&&tipoTermino=="int")
+               tipoTermino="float";
+           if(tipoFactor=="string" || tipoTermino=="string")
+               throw new InvalidAssigmentException("no podes dividir strings");
            nTerm = NodoSintactico.crearNodo("/",(NodoSintactico)nTerm,(NodoSintactico)nFactor);
            RESULT = nTerm;
          :};
 
-factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); nFactor = NodoSintactico.crearHoja(id); RESULT=nFactor;:};
+factor ::= IDENTIFIER:id {: System.out.println("Id: " + id); nFactor = NodoSintactico.crearHoja(id); tipoFactor=SymbolTableGenerator.getTipo(id.toString()); if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
+                                                                                                                                                                 throw new UndeclaredVariableException("ERROR semantico: la variable '" + id + "' no fue declarada.");
+                                                                                                                                                             }
+ RESULT=nFactor;:};
 factor ::= INTEGER_CONSTANT:constant {:
             System.out.println("Constant: " + constant);
             String value = constant.toString();
             SymbolTableGenerator.addConstant(value, "int", value);
             nFactor = NodoSintactico.crearHoja(constant);
+            tipoFactor="int";
             RESULT=nFactor;
             :};
 
@@ -422,6 +467,7 @@ factor ::= FLOAT_CONSTANT:constant {:
             String value = constant.toString();
             SymbolTableGenerator.addConstant(value, "float", value);
             nFactor = NodoSintactico.crearHoja(constant);
+            tipoFactor="float";
             RESULT=nFactor;
             :};
 
@@ -430,6 +476,7 @@ factor ::= STRING_LITERAL:literal {:
             String value = literal.toString();
             SymbolTableGenerator.addConstant(value, "string", value);
             nFactor = NodoSintactico.crearHoja(literal);
+            tipoFactor="string";
             RESULT=nFactor;
             :};
 

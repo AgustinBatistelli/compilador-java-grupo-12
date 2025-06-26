@@ -40,6 +40,10 @@ public class SymbolTableGenerator implements FileGenerator {
         return table.containsKey(name);
     }
 
+    public static String getTipo(String name) {
+        Constant c = table.get(name);
+        return (c != null) ? c.type : null;
+    }
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
