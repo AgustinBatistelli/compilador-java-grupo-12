@@ -4,24 +4,20 @@ init {
     varInt1, varInt2, varInt3, varInt4, varInt5, varInt6, varInt7, varInt8, varInt9, varInt10, varInt11, varInt12, varInt13, varInt14 : Int
     varStr1 : String
 }
-
 varInt11 := 130814
 
 if (varFloat1 > varFloat2)
 {
-    if (varFloat3 > varFloat1)
+    if (varFloat3 < varFloat1)
     {
-        varFloat1 := 1
-        varFloat2 := 1
-        varFloat3 := 2
+        write("c es mayor que a, que es mayor que b")
     }
     else
     {
-        varFloat3 = varFloat4 * (varInt1 - 21) / 4
+        write(varStr1)
     }
 }
 else
 {
-    varFloat4 := 2
-    varInt1 := 4
+    write(varInt11)
 }

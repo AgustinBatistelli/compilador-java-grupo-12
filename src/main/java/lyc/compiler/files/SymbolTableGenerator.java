@@ -11,7 +11,7 @@ import java.util.Map;
 public class SymbolTableGenerator implements FileGenerator {
 
     private static final Map<String, Constant> table = new LinkedHashMap<>();
-
+    public static Map<String, String> tablaStrings = new LinkedHashMap<>();
     private static class Constant {
         String type;
         String value;
@@ -98,11 +98,10 @@ public class SymbolTableGenerator implements FileGenerator {
         return length;
     }
 
-
     public static List<String> generarSeccionData() {
         List<String> seccionData = new ArrayList<>();
         seccionData.add(".data");
-
+        int cantStrings=1;
         for (Map.Entry<String, Constant> entry : table.entrySet()) {
             String id = entry.getKey();
             Constant cte = entry.getValue();
@@ -122,7 +121,8 @@ public class SymbolTableGenerator implements FileGenerator {
                     }
                     break;
                 case "string":
-                    linea = id + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                    linea = (cte.value.isEmpty()? id : "_cteStr"+ cantStrings++) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                    tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings++ ));
                     break;
                 default:
                     break;

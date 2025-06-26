@@ -178,6 +178,8 @@ if_stmt ::= IF OPEN_PARENTHESES comparison:cmp CLOSE_PARENTHESES OPEN_BRACE sent
 write_stmt ::= WRITE OPEN_PARENTHESES STRING_LITERAL:str CLOSE_PARENTHESES
              {:
                 System.out.println("Write statement with string literal: " + str);
+                String value = str.toString();
+                SymbolTableGenerator.addConstant(value, "string", value);
                 nWrite=NodoSintactico.crearNodo("WRITE",NodoSintactico.crearHoja(str),null);
                 RESULT = nWrite;
              :};
@@ -188,7 +190,6 @@ write_stmt ::= WRITE OPEN_PARENTHESES IDENTIFIER:id CLOSE_PARENTHESES
                 if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
                     throw new UndeclaredVariableException("ERROR semantico: la variable '" + id + "' no fue declarada.");
                 }
-
                 nWrite=NodoSintactico.crearNodo("WRITE",NodoSintactico.crearHoja(id),null);
                 RESULT = nWrite;
             :};

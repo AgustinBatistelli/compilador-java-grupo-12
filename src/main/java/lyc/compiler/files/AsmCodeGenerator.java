@@ -12,6 +12,9 @@ public class AsmCodeGenerator implements FileGenerator {
 
     private List<String> instruccionesAssembler=new ArrayList<>();
     private int ifCounter = 0;
+    private int stringCounter = 0;
+    private final List<String> constantesString = new ArrayList<>();
+    private final List<String> etiquetasString = new ArrayList<>();
     private static final List<NodoSintactico> arboles = new ArrayList<>();
     public void addTree(NodoSintactico root) {
         if (root != null) {
@@ -79,12 +82,30 @@ public class AsmCodeGenerator implements FileGenerator {
             case "IF":
                 generarIf(nodo);
                 break;
-
+            case "WRITE":
+                generarWrite(nodo);
+                break;
             default:
                 break;
         }
     }
 
+    private void generarWrite(NodoSintactico nodo) {
+        NodoSintactico arg = nodo.getIzquierdo();
+        String valor = arg.getValor();
+        if (SymbolTableGenerator.tablaStrings.get(valor)  != null)
+        {
+            instruccionesAssembler.add("mov ah, 09h");
+            instruccionesAssembler.add("mov dx, offset " + SymbolTableGenerator.tablaStrings.get(valor));
+            instruccionesAssembler.add("int 21h");
+        }
+        else {
+            instruccionesAssembler.add("mov ax, [" + valor + "]");
+            instruccionesAssembler.add("call printInt");
+        }
+
+        instruccionesAssembler.add(""); // Línea vacía para legibilidad
+    }
 
     public void generarInstrucciones(NodoSintactico nodo) {
         if (!nodo.getValor().equals(":=")) return;
