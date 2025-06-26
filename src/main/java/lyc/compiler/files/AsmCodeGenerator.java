@@ -10,6 +10,7 @@ import java.util.List;
 public class AsmCodeGenerator implements FileGenerator {
 
     private List<String> instruccionesAssembler=new ArrayList<>();
+    private int ifCounter = 0;
     private static final List<NodoSintactico> arboles = new ArrayList<>();
     public void addTree(NodoSintactico root) {
         if (root != null) {
@@ -69,11 +70,15 @@ public class AsmCodeGenerator implements FileGenerator {
                 generarInstrucciones(nodo);
                 break;
 
-            // Podés agregar otros casos si querés procesar más cosas (como IF, WRITE, etc.)
+            case "IF":
+                generarIf(nodo);
+                break;
+
             default:
                 break;
         }
     }
+
 
     public void generarInstrucciones(NodoSintactico nodo) {
         if (!nodo.getValor().equals(":=")) return;
@@ -117,5 +122,48 @@ public class AsmCodeGenerator implements FileGenerator {
                 break;
         }
     }
+
+    private void generarIf(NodoSintactico nodo) {
+        NodoSintactico condicion = nodo.getIzquierdo();  // comparación
+        NodoSintactico cuerpo = nodo.getDerecho();       // puede ser CUERPO o directamente THEN
+
+        String op = condicion.getValor(); // >, <, etc.
+        NodoSintactico izq = condicion.getIzquierdo();
+        NodoSintactico der = condicion.getDerecho();
+
+        String etiquetaElse = "ELSE" + (++ifCounter);
+        String etiquetaFin = "ENDIF" + (ifCounter);
+
+        instruccionesAssembler.add("; IF " + izq.getValor() + " " + op + " " + der.getValor());
+        instruccionesAssembler.add("FLD " + izq.getValor());
+        instruccionesAssembler.add("FLD " + der.getValor());
+        instruccionesAssembler.add("FCOMPP");
+        instruccionesAssembler.add("FSTSW AX");
+        instruccionesAssembler.add("SAHF");
+
+        switch (op) {
+            case ">": instruccionesAssembler.add("JBE " + etiquetaElse); break;
+            case "<": instruccionesAssembler.add("JAE " + etiquetaElse); break;
+            case "==": instruccionesAssembler.add("JNE " + etiquetaElse); break;
+            case "!=": instruccionesAssembler.add("JE " + etiquetaElse); break;
+            case ">=": instruccionesAssembler.add("JB " + etiquetaElse); break;
+            case "<=": instruccionesAssembler.add("JA " + etiquetaElse); break;
+            default: instruccionesAssembler.add("; operador desconocido: " + op);
+        }
+
+        // THEN o CUERPO
+        if (cuerpo.getValor().equals("CUERPO")) {
+            recorrerYGenerarAssembler(cuerpo.getIzquierdo()); // THEN
+            instruccionesAssembler.add("JMP " + etiquetaFin);
+            instruccionesAssembler.add(etiquetaElse + ":");
+            recorrerYGenerarAssembler(cuerpo.getDerecho()); // ELSE
+        } else {
+            recorrerYGenerarAssembler(cuerpo); // sólo THEN
+            instruccionesAssembler.add(etiquetaElse + ":");
+        }
+
+        instruccionesAssembler.add(etiquetaFin + ":");
+    }
+
 
 }
