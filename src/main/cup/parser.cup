@@ -102,6 +102,7 @@ sentences ::= sentence:snt
         nSentences = nSentence;
         RESULT = nSentence;
     :};
+
 sentences ::= sentence:snt sentences:rest
     {:
         nSentences = NodoSintactico.crearNodo(";", snt, rest);
@@ -251,8 +252,8 @@ negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expres
 
                     nNegativeCalculation = NodoSintactico.crearNodo("negativeCalculation", null, null);
 
-                    nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTreeIterative(expList.subList(0, expList.size() / 2)));
-                    nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTreeIterative(expList.subList(expList.size() / 2, expList.size())));
+                    //nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTreeIterative(expList.subList(0, expList.size() / 2)));
+                    //nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTreeIterative(expList.subList(expList.size() / 2, expList.size())));
 
                     RESULT = nNegativeCalculation;
                 :};

@@ -13,6 +13,7 @@ public class AsmCodeGenerator implements FileGenerator {
     private List<String> instruccionesAssembler=new ArrayList<>();
     private int ifCounter = 0;
     private int stringCounter = 0;
+    private int whileCounter = 0;
     private final List<String> constantesString = new ArrayList<>();
     private final List<String> etiquetasString = new ArrayList<>();
     private static final List<NodoSintactico> arboles = new ArrayList<>();
@@ -82,10 +83,14 @@ public class AsmCodeGenerator implements FileGenerator {
             case "IF":
                 generarIf(nodo);
                 break;
+
+            case "WHILE":
+                generarWhile(nodo);
+                break;
             case "WRITE":
                 generarWrite(nodo);
                 break;
-            default:
+           default:
                 break;
         }
     }
@@ -110,11 +115,11 @@ public class AsmCodeGenerator implements FileGenerator {
     public void generarInstrucciones(NodoSintactico nodo) {
         if (!nodo.getValor().equals(":=")) return;
 
-        NodoSintactico lhs = nodo.getIzquierdo(); // variable destino
-        NodoSintactico rhs = nodo.getDerecho(); // expresión
+        NodoSintactico lhs = nodo.getIzquierdo();
+        NodoSintactico rhs = nodo.getDerecho();
 
-        generarExpresion(rhs); // genera el cálculo
-        instruccionesAssembler.add("FSTP " + lhs.getValor()); // guarda el resultado
+        generarExpresion(rhs);
+        instruccionesAssembler.add("FSTP " + lhs.getValor());
     }
 
     private void generarExpresion(NodoSintactico nodo) {
@@ -148,6 +153,48 @@ public class AsmCodeGenerator implements FileGenerator {
                 instruccionesAssembler.add("FLD " + (esNumero(etiqueta)?"_cte"+etiqueta:etiqueta));
                 break;
         }
+    }
+
+    private void generarWhile(NodoSintactico nodo) {
+        NodoSintactico condicion = nodo.getIzquierdo();
+        NodoSintactico cuerpo = nodo.getDerecho();
+
+        String etiquetaInicio = "WHILE_START" + (++whileCounter);
+        String etiquetaFin = "WHILE_END" + (whileCounter);
+
+        instruccionesAssembler.add(etiquetaInicio + ":");
+
+        NodoSintactico izq = condicion.getIzquierdo();
+        NodoSintactico der = condicion.getDerecho();
+        String operador = condicion.getValor();
+
+        instruccionesAssembler.add("; WHILE " + izq.getValor() + " " + operador + " " + der.getValor());
+        instruccionesAssembler.add("FLD " + izq.getValor());
+        instruccionesAssembler.add("FLD " + der.getValor());
+        instruccionesAssembler.add("FCOMPP");
+        instruccionesAssembler.add("FSTSW AX");
+        instruccionesAssembler.add("SAHF");
+
+        switch (operador) {
+            case ">": instruccionesAssembler.add("JBE " + etiquetaFin); break;
+            case "<": instruccionesAssembler.add("JAE " + etiquetaFin); break;
+            case "==": instruccionesAssembler.add("JNE " + etiquetaFin); break;
+            case "!=": instruccionesAssembler.add("JE " + etiquetaFin); break;
+            case ">=": instruccionesAssembler.add("JB " + etiquetaFin); break;
+            case "<=": instruccionesAssembler.add("JA " + etiquetaFin); break;
+            default: instruccionesAssembler.add("; operador desconocido: " + operador);
+        }
+
+        if (cuerpo.getValor().equals("CUERPO")) {
+            recorrerYGenerarAssembler(cuerpo.getIzquierdo());
+            if (cuerpo.getDerecho() != null)
+                recorrerYGenerarAssembler(cuerpo.getDerecho());
+        } else {
+            recorrerYGenerarAssembler(cuerpo);
+        }
+
+        instruccionesAssembler.add("JMP " + etiquetaInicio);
+        instruccionesAssembler.add(etiquetaFin + ":");
     }
 
     public boolean esNumero(String str) {
