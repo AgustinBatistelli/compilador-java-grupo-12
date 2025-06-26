@@ -14,6 +14,8 @@ action code
     public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
     public ArrayList<String> listaIds;
     public String tipoExpresion,tipoFactor,tipoTermino;
+    public Stack<NodoSintactico>pilaT = new Stack<>();
+    public Stack<NodoSintactico>pilaE = new Stack<>();
 :}
 // Terminals
 terminal ASSIG;
@@ -91,7 +93,9 @@ program ::= sentences
                 generator.generate();
                 gen.addTree(nSentences);
                 gen.generate();
-                gen.generateAssembler();
+                AsmCodeGenerator generadorAsm = new AsmCodeGenerator();
+                generadorAsm.addTree(nSentences);
+                generadorAsm.generate();
           :};
 sentences ::= sentence:snt
     {:
@@ -414,7 +418,8 @@ expression ::=  expression:exp1 PLUS term:exp2 {:
                 nExp = NodoSintactico.crearNodo("+",(NodoSintactico)nExp,(NodoSintactico)nTerm);
                 RESULT = nExp;
             :};
-expression ::= expression:exp1 SUB term:exp2 {:
+expression ::= expression:exp1 {: pilaE.push(nExp); :}SUB term:exp2 {:
+                nExp=pilaE.pop();
                 System.out.println(exp1 + " - " + exp2);
                 if(tipoExpresion=="int"&& tipoTermino=="float")
                     tipoExpresion="float";
@@ -430,7 +435,8 @@ term ::= factor:exp {: nTerm = nFactor;
                         tipoTermino = tipoFactor;
                         RESULT = nTerm;
                     :};
-term ::= term:exp1 MULT factor:exp2 {:
+term ::= term:exp1 {: pilaT.push(nTerm); :} MULT factor:exp2 {:
+            nTerm=pilaT.pop();
             System.out.println(exp1 + " * " + exp2);
             if(tipoFactor=="float"&&tipoTermino=="int")
                 tipoTermino="float";
