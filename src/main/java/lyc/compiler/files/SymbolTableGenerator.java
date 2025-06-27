@@ -122,7 +122,7 @@ public class SymbolTableGenerator implements FileGenerator {
                     break;
                 case "string":
                     linea = (cte.value.isEmpty()? id : "_cteStr"+ cantStrings++) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
-                    tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings++ ));
+                    tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings ));
                     break;
                 default:
                     break;

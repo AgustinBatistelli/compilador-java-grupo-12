@@ -10,7 +10,7 @@ class Parser;
 
 action code
 {:
-    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS, nNegativeCalculation;
+    public NodoSintactico nExp,nTerm,nFactor,nAsig,nComp,nSentence,nIf,nSentences,nWhile,nWrite,nRead,nInit,nListId,nReorderStatement,nReorderL,nListIdPartial,nReorderLE,nBoolExp,nVarList,nVarListS, nNegativeCalculation,nfloat_expression_list;
     public IntermediateCodeGenerator gen = new IntermediateCodeGenerator();
     public ArrayList<String> listaIds;
     public String tipoExpresion,tipoFactor,tipoTermino;
@@ -87,20 +87,20 @@ non terminal  float_expression_list;
 // Start Symbol Definition
 start with program;
 
-program ::= sentences
+program ::= sentences:s
           {:
                 SymbolTableGenerator generator = new SymbolTableGenerator();
                 generator.generate();
-                gen.addTree(nSentences);
+                gen.addTree(s);
                 gen.generate();
                 AsmCodeGenerator generadorAsm = new AsmCodeGenerator();
-                generadorAsm.addTree(nSentences);
+                generadorAsm.addTree(s);
                 generadorAsm.generate();
           :};
 sentences ::= sentence:snt
     {:
-        nSentences = nSentence;
-        RESULT = nSentence;
+        nSentences = snt;
+        RESULT = nSentences;
     :};
 sentences ::= sentence:snt sentences:rest
     {:
@@ -151,7 +151,13 @@ assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
     if (!SymbolTableGenerator.isVariableDefined(id.toString().trim())) {
         throw new UndeclaredVariableException("ERROR semantico: la variable '" + id.toString() + "' no fue declarada pero esta siendo usada");
     }
-    nAsig = NodoSintactico.crearNodo("=", NodoSintactico.crearHoja(id), nNegativeCalculation);
+    nAsig = NodoSintactico.crearNodo("NEGATIVE_CALCULATION",nNegativeCalculation,NodoSintactico.crearNodo("IF",
+            NodoSintactico.crearNodo("%%",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("2")),
+            NodoSintactico.crearNodo("CUERPO",
+            NodoSintactico.crearNodo("=",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("@suma")),NodoSintactico.crearNodo("=",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("@multi")))
+            ));
+
+
 
     System.out.println("Assignment result of NegativeCalculation to ID: " + id);
 
@@ -248,11 +254,9 @@ reorder_list_elements ::= expression:exp
 negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expression_list:exp CLOSE_PARENTHESES
                 {:
                     List<String> expList = (List<String>) exp;
-
-                    nNegativeCalculation = NodoSintactico.crearNodo("negativeCalculation", null, null);
-
-                    nNegativeCalculation.setIzquierdo(NodoSintactico.createBalancedTreeIterative(expList.subList(0, expList.size() / 2)));
-                    nNegativeCalculation.setDerecho(NodoSintactico.createBalancedTreeIterative(expList.subList(expList.size() / 2, expList.size())));
+                    nNegativeCalculation = NodoSintactico.crearNodo("S",NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("0")),
+                    NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja("0"))),
+                    NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja("0")),nfloat_expression_list));
 
                     RESULT = nNegativeCalculation;
                 :};
@@ -261,6 +265,15 @@ float_expression_list ::= FLOAT_CONSTANT:exp
                         {:
                             List<String> expList = new ArrayList<>();
                             expList.add(exp.toString());
+                            nfloat_expression_list=NodoSintactico.crearNodo("IF",
+                            NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(exp),NodoSintactico.crearHoja("0")),
+                            NodoSintactico.crearNodo("S",
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("1"))),
+                            NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),
+                            NodoSintactico.crearNodo("*",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja(exp))),
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja(exp))))));
                             RESULT = expList;
                         :};
 
@@ -268,6 +281,15 @@ float_expression_list ::= IDENTIFIER:id
                         {:
                             List<String> expList = new ArrayList<>();
                             expList.add(id.toString());
+                            nfloat_expression_list=NodoSintactico.crearNodo("IF",
+                            NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("0")),
+                            NodoSintactico.crearNodo("S",
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("1"))),
+                            NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),
+                            NodoSintactico.crearNodo("*",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja(id))),
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja(id))))));
                             RESULT = expList;
                         :};
 
@@ -275,6 +297,17 @@ float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list
                         {:
                             List<String> expList = (List<String>) list;
                             expList.add(exp.toString());
+                            nfloat_expression_list=NodoSintactico.crearNodo(";",nfloat_expression_list,
+                            NodoSintactico.crearNodo("IF",
+                            NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(exp),NodoSintactico.crearHoja("0")),
+                            NodoSintactico.crearNodo("S",
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("1"))),
+                            NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),
+                            NodoSintactico.crearNodo("*",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja(exp))),
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja(exp))))))
+                            );
                             RESULT = expList;
                         :};
 
@@ -282,6 +315,17 @@ float_expression_list ::= IDENTIFIER:id COMMA float_expression_list:list
                         {:
                             List<String> expList = (List<String>) list;
                             expList.add(id.toString());
+                            nfloat_expression_list=NodoSintactico.crearNodo(";",nfloat_expression_list,
+                            NodoSintactico.crearNodo("IF",
+                            NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("0")),
+                            NodoSintactico.crearNodo("S",
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("1"))),
+                            NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),
+                            NodoSintactico.crearNodo("*",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja(id))),
+                            NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),
+                            NodoSintactico.crearNodo("+",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja(id))))))
+                            );
                             RESULT = expList;
                         :};
 

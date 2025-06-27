@@ -16,14 +16,14 @@ public class AsmCodeGenerator implements FileGenerator {
     private final List<String> constantesString = new ArrayList<>();
     private final List<String> etiquetasString = new ArrayList<>();
     private static final List<NodoSintactico> arboles = new ArrayList<>();
+
     public void addTree(NodoSintactico root) {
         if (root != null) {
             arboles.add(root);
         }
     }
 
-    public AsmCodeGenerator() {
-    }
+    public AsmCodeGenerator() {}
 
     @Override
     public void generate() {
@@ -36,15 +36,18 @@ public class AsmCodeGenerator implements FileGenerator {
 
     @Override
     public void generate(FileWriter fileWriter) throws IOException {
-        List <String> variables = new ArrayList<>();
+        List<String> variables = new ArrayList<>();
         fileWriter.write(".model small\n");
         fileWriter.write(".stack 100h\n");
         fileWriter.write(".data\n");
         variables.addAll(SymbolTableGenerator.generarSeccionData());
-        for (String variable : variables)
-        {
+        for (String variable : variables) {
             fileWriter.write(variable + "\n");
         }
+        fileWriter.write( "    @cant dd ?"+ "\n");
+        fileWriter.write( "    @suma dd ?"+ "\n");
+        fileWriter.write( "    @multi dd ?"+ "\n");
+        fileWriter.write( "    _cte0 dd 0"+ "\n");
         fileWriter.write(".code\n");
         fileWriter.write("start:\n");
         generateAssembler();
@@ -74,54 +77,69 @@ public class AsmCodeGenerator implements FileGenerator {
                 recorrerYGenerarAssembler(nodo.getIzquierdo());
                 recorrerYGenerarAssembler(nodo.getDerecho());
                 break;
-
             case ":=":
                 generarInstrucciones(nodo);
                 break;
-
+            case "=":
+                generarAsignacionSimple(nodo);
+                break;
             case "IF":
                 generarIf(nodo);
                 break;
             case "WRITE":
                 generarWrite(nodo);
                 break;
-            default:
+            case "S":
+                recorrerYGenerarAssembler(nodo.getIzquierdo());
+                recorrerYGenerarAssembler(nodo.getDerecho());
+                break;
+
+            case "NEGATIVE_CALCULATION":
+                generarNegativeCalculation(nodo);
                 break;
         }
+    }
+
+    private void generarNegativeCalculation(NodoSintactico nodo) {
+        recorrerYGenerarAssembler(nodo.getIzquierdo());
+        recorrerYGenerarAssembler(nodo.getDerecho());
     }
 
     private void generarWrite(NodoSintactico nodo) {
         NodoSintactico arg = nodo.getIzquierdo();
         String valor = arg.getValor();
-        if (SymbolTableGenerator.tablaStrings.get(valor)  != null)
-        {
+        if (SymbolTableGenerator.tablaStrings.get(valor) != null) {
             instruccionesAssembler.add("mov ah, 09h");
             instruccionesAssembler.add("mov dx, offset " + SymbolTableGenerator.tablaStrings.get(valor));
             instruccionesAssembler.add("int 21h");
-        }
-        else {
+        } else {
             instruccionesAssembler.add("mov ax, [" + valor + "]");
             instruccionesAssembler.add("call printInt");
         }
-
-        instruccionesAssembler.add(""); // Línea vacía para legibilidad
+        instruccionesAssembler.add("");
     }
 
     public void generarInstrucciones(NodoSintactico nodo) {
-        if (!nodo.getValor().equals(":=")) return;
+        NodoSintactico lhs = nodo.getIzquierdo();
+        NodoSintactico rhs = nodo.getDerecho();
+        generarExpresion(rhs);
+        instruccionesAssembler.add("FSTP " + lhs.getValor());
+    }
 
-        NodoSintactico lhs = nodo.getIzquierdo(); // variable destino
-        NodoSintactico rhs = nodo.getDerecho(); // expresión
-
-        generarExpresion(rhs); // genera el cálculo
-        instruccionesAssembler.add("FSTP " + lhs.getValor()); // guarda el resultado
+    private void generarAsignacionSimple(NodoSintactico nodo) {
+        String lhs = nodo.getIzquierdo().getValor();
+        String rhs = nodo.getDerecho().getValor();
+        if (esNumero(rhs)) {
+            instruccionesAssembler.add("mov ax, " + rhs);
+        } else {
+            instruccionesAssembler.add("mov ax, [" + rhs + "]");
+        }
+        instruccionesAssembler.add("mov [" + lhs + "], ax");
     }
 
     private void generarExpresion(NodoSintactico nodo) {
         if (nodo == null) return;
-
         String etiqueta = nodo.getValor();
-
         switch (etiqueta) {
             case "+":
                 generarExpresion(nodo.getIzquierdo());
@@ -144,9 +162,13 @@ public class AsmCodeGenerator implements FileGenerator {
                 instruccionesAssembler.add("FDIV");
                 break;
             default:
-                // Es un número o identificador
-                instruccionesAssembler.add("FLD " + (esNumero(etiqueta)?"_cte"+etiqueta:etiqueta));
-                break;
+                if(SymbolTableGenerator.tablaStrings.get(etiqueta) != null) {
+                    instruccionesAssembler.add("FLD " + (esNumero(etiqueta) ? "_cte" + etiqueta : etiqueta));
+                }
+                else
+                {
+                    instruccionesAssembler.add("FLD " + etiqueta);
+                }
         }
     }
 
@@ -161,46 +183,50 @@ public class AsmCodeGenerator implements FileGenerator {
     }
 
     private void generarIf(NodoSintactico nodo) {
-        NodoSintactico condicion = nodo.getIzquierdo();  // comparación
-        NodoSintactico cuerpo = nodo.getDerecho();       // puede ser CUERPO o directamente THEN
-
-        String op = condicion.getValor(); // >, <, etc.
+        NodoSintactico condicion = nodo.getIzquierdo();
+        NodoSintactico cuerpo = nodo.getDerecho();
+        String op = condicion.getValor();
         NodoSintactico izq = condicion.getIzquierdo();
         NodoSintactico der = condicion.getDerecho();
-
         String etiquetaElse = "ELSE" + (++ifCounter);
         String etiquetaFin = "ENDIF" + (ifCounter);
 
         instruccionesAssembler.add("; IF " + izq.getValor() + " " + op + " " + der.getValor());
-        instruccionesAssembler.add("FLD " + izq.getValor());
-        instruccionesAssembler.add("FLD " + der.getValor());
-        instruccionesAssembler.add("FCOMPP");
-        instruccionesAssembler.add("FSTSW AX");
-        instruccionesAssembler.add("SAHF");
 
-        switch (op) {
-            case ">": instruccionesAssembler.add("JBE " + etiquetaElse); break;
-            case "<": instruccionesAssembler.add("JAE " + etiquetaElse); break;
-            case "==": instruccionesAssembler.add("JNE " + etiquetaElse); break;
-            case "!=": instruccionesAssembler.add("JE " + etiquetaElse); break;
-            case ">=": instruccionesAssembler.add("JB " + etiquetaElse); break;
-            case "<=": instruccionesAssembler.add("JA " + etiquetaElse); break;
-            default: instruccionesAssembler.add("; operador desconocido: " + op);
+        if (op.equals("%%")) {
+            instruccionesAssembler.add("MOV AX, [" + izq.getValor() + "]");
+            instruccionesAssembler.add("MOV BL, " + der.getValor());
+            instruccionesAssembler.add("DIV BL");
+            instruccionesAssembler.add("CMP AH, 0");
+            instruccionesAssembler.add("JNE " + etiquetaElse);
+        } else {
+            instruccionesAssembler.add("FLD " + izq.getValor());
+            instruccionesAssembler.add("FLD " + der.getValor());
+            instruccionesAssembler.add("FCOMPP");
+            instruccionesAssembler.add("FSTSW AX");
+            instruccionesAssembler.add("SAHF");
+
+            switch (op) {
+                case ">": instruccionesAssembler.add("JBE " + etiquetaElse); break;
+                case "<": instruccionesAssembler.add("JAE " + etiquetaElse); break;
+                case "==": instruccionesAssembler.add("JNE " + etiquetaElse); break;
+                case "!=": instruccionesAssembler.add("JE " + etiquetaElse); break;
+                case ">=": instruccionesAssembler.add("JB " + etiquetaElse); break;
+                case "<=": instruccionesAssembler.add("JA " + etiquetaElse); break;
+                default: instruccionesAssembler.add("; operador desconocido: " + op);
+            }
         }
 
-        // THEN o CUERPO
         if (cuerpo.getValor().equals("CUERPO")) {
-            recorrerYGenerarAssembler(cuerpo.getIzquierdo()); // THEN
+            recorrerYGenerarAssembler(cuerpo.getIzquierdo());
             instruccionesAssembler.add("JMP " + etiquetaFin);
             instruccionesAssembler.add(etiquetaElse + ":");
-            recorrerYGenerarAssembler(cuerpo.getDerecho()); // ELSE
+            recorrerYGenerarAssembler(cuerpo.getDerecho());
         } else {
-            recorrerYGenerarAssembler(cuerpo); // sólo THEN
+            recorrerYGenerarAssembler(cuerpo);
             instruccionesAssembler.add(etiquetaElse + ":");
         }
 
         instruccionesAssembler.add(etiquetaFin + ":");
     }
-
-
 }
