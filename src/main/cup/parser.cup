@@ -152,7 +152,7 @@ assignment ::= IDENTIFIER:id assign_operator negative_calculation_stmt {:
         throw new UndeclaredVariableException("ERROR semantico: la variable '" + id.toString() + "' no fue declarada pero esta siendo usada");
     }
     nAsig = NodoSintactico.crearNodo("NEGATIVE_CALCULATION",nNegativeCalculation,NodoSintactico.crearNodo("IF",
-            NodoSintactico.crearNodo("%%",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("2")),
+            NodoSintactico.crearNodo("==",NodoSintactico.crearNodo("%%",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("2")),NodoSintactico.crearHoja("0")),
             NodoSintactico.crearNodo("CUERPO",
             NodoSintactico.crearNodo("=",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("@suma")),NodoSintactico.crearNodo("=",NodoSintactico.crearHoja(id),NodoSintactico.crearHoja("@multi")))
             ));
@@ -186,6 +186,7 @@ write_stmt ::= WRITE OPEN_PARENTHESES STRING_LITERAL:str CLOSE_PARENTHESES
                 System.out.println("Write statement with string literal: " + str);
                 String value = str.toString();
                 SymbolTableGenerator.addConstant(value, "string", value);
+                SymbolTableGenerator.addString(value);
                 nWrite=NodoSintactico.crearNodo("WRITE",NodoSintactico.crearHoja(str),null);
                 RESULT = nWrite;
              :};

@@ -12,6 +12,7 @@ public class SymbolTableGenerator implements FileGenerator {
 
     private static final Map<String, Constant> table = new LinkedHashMap<>();
     public static Map<String, String> tablaStrings = new LinkedHashMap<>();
+    private static int cantStrings=0;
     private static class Constant {
         String type;
         String value;
@@ -21,6 +22,14 @@ public class SymbolTableGenerator implements FileGenerator {
             this.type = type;
             this.value = value;
             this.length = length;
+        }
+    }
+
+    public static void addString(String identifier) {
+
+        if (!tablaStrings.containsKey(identifier))
+        {
+            tablaStrings.put(identifier,"_cteStr"+ ++cantStrings);
         }
     }
 
@@ -101,7 +110,10 @@ public class SymbolTableGenerator implements FileGenerator {
     public static List<String> generarSeccionData() {
         List<String> seccionData = new ArrayList<>();
         seccionData.add(".data");
-        int cantStrings=1;
+        for (Map.Entry<String,String> entry1 : tablaStrings.entrySet())
+        {
+            seccionData.add("    " + entry1.getValue() +" db \"" + entry1.getKey() + "\", '$'");
+        }
         for (Map.Entry<String, Constant> entry : table.entrySet()) {
             String id = entry.getKey();
             Constant cte = entry.getValue();
@@ -110,10 +122,20 @@ public class SymbolTableGenerator implements FileGenerator {
             String linea="";
 
             switch (tipo) {
-                case "int", "float":
+                case "int":
                     if (cte.length > 0)
                     {
-                        linea = "_cte" + id + " dd " + cte.value;
+                        linea = "_cte" + id  + " dd " + cte.value + ".0";
+                    }
+                    else
+                    {
+                        linea = id + " dd ?";
+                    }
+                    break;
+                case "float":
+                    if (cte.length > 0)
+                    {
+                        linea = "_ctef" + ((int)Double.parseDouble(id)) + " dd " + cte.value;
                     }
                     else
                     {
@@ -121,14 +143,18 @@ public class SymbolTableGenerator implements FileGenerator {
                     }
                     break;
                 case "string":
-                    linea = (cte.value.isEmpty()? id : "_cteStr"+ cantStrings++) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
-                    tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings ));
+                    if (!tablaStrings.containsKey(id))
+                    {
+                        linea = (cte.value.isEmpty()? id : "_cteStr"+ ++cantStrings) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                        tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings ));
+                    }
                     break;
                 default:
                     break;
             }
 
             seccionData.add("    " + linea);
+
         }
 
         return seccionData;
