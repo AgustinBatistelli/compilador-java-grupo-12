@@ -112,7 +112,14 @@ public class SymbolTableGenerator implements FileGenerator {
         seccionData.add(".data");
         for (Map.Entry<String,String> entry1 : tablaStrings.entrySet())
         {
-            seccionData.add("    " + entry1.getValue() +" db \"" + entry1.getKey() + "\", '$'");
+            if(table.containsKey(entry1.getKey())) {
+                if (table.get(entry1.getKey()).length > 0) {
+                    seccionData.add("    " + entry1.getValue() + " db \"" + entry1.getKey() + "\", '$'");
+                }
+                else {
+                    seccionData.add("    " + entry1.getValue() + " db 50 dup(?)");
+                }
+            }
         }
         for (Map.Entry<String, Constant> entry : table.entrySet()) {
             String id = entry.getKey();
@@ -120,12 +127,15 @@ public class SymbolTableGenerator implements FileGenerator {
 
             String tipo = cte.type.toLowerCase();
             String linea="";
-
+            if(id.equals("0"))
+            {
+                continue;
+            }
             switch (tipo) {
                 case "int":
                     if (cte.length > 0)
                     {
-                        linea = "_cte" + id  + " dd " + cte.value + ".0";
+                        linea = "_cte" + (id.contains("-")? "m" + id.substring(id.indexOf('-')+1):id)  + " dd " + cte.value + ".0";
                     }
                     else
                     {
@@ -135,7 +145,9 @@ public class SymbolTableGenerator implements FileGenerator {
                 case "float":
                     if (cte.length > 0)
                     {
-                        linea = "_ctef" + ((int)Double.parseDouble(id)) + " dd " + cte.value;
+                        String nombre = id.replace("-", "m").replace(".", "dot");
+                        linea = "_ctef" + nombre + " dd " + cte.value;
+
                     }
                     else
                     {
@@ -145,7 +157,15 @@ public class SymbolTableGenerator implements FileGenerator {
                 case "string":
                     if (!tablaStrings.containsKey(id))
                     {
-                        linea = (cte.value.isEmpty()? id : "_cteStr"+ ++cantStrings) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                        if(cte.value.isEmpty())
+                        {
+                            linea =  id + " db 50 dup(?)";
+                        }
+                        else
+                        {
+                            linea = (cte.value.isEmpty()? id : "_cteStr"+ ++cantStrings) + " db \"" + (cte.value != null ? cte.value : "") + "\", '$'";
+                        }
+
                         tablaStrings.put((cte.value.isEmpty() ? id:cte.value ), (cte.value.isEmpty() ? id:"_cteStr"+ cantStrings ));
                     }
                     break;

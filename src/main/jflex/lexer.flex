@@ -165,10 +165,19 @@ StringLiteral = (\"([^\"\\]|\\.)*\") | (\“([^\“\\]|\\.)*\”)
   }
 
   /* Float */
-  {FloatConstant} {
-    System.out.println("Float: " + yytext());
-    return symbol(ParserSym.FLOAT_CONSTANT, yytext());
-  }
+{FloatConstant} {
+    String lexeme = yytext();
+
+    if (lexeme.startsWith(".")) {
+        lexeme = "0" + lexeme;
+    }
+    if (lexeme.endsWith(".")) {
+        lexeme = lexeme + "0";
+    }
+
+    System.out.println("Float: " + lexeme);
+    return symbol(ParserSym.FLOAT_CONSTANT, lexeme);
+}
 
   /* Identifiers */
   {Identifier} {

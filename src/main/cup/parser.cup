@@ -255,9 +255,13 @@ reorder_list_elements ::= expression:exp
 negative_calculation_stmt ::= NEGATIVE_CALCULATION OPEN_PARENTHESES float_expression_list:exp CLOSE_PARENTHESES
                 {:
                     List<String> expList = (List<String>) exp;
+                    SymbolTableGenerator.addConstant("0", "int", "0");
+                    SymbolTableGenerator.addConstant("1", "int", "1");
+                    SymbolTableGenerator.addConstant("2", "int", "2");
+
                     nNegativeCalculation = NodoSintactico.crearNodo("S",NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@cant"),NodoSintactico.crearHoja("0")),
                     NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@suma"),NodoSintactico.crearHoja("0"))),
-                    NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja("0")),nfloat_expression_list));
+                    NodoSintactico.crearNodo("S",NodoSintactico.crearNodo(":=",NodoSintactico.crearHoja("@multi"),NodoSintactico.crearHoja("1")),nfloat_expression_list));
 
                     RESULT = nNegativeCalculation;
                 :};
@@ -266,6 +270,8 @@ float_expression_list ::= FLOAT_CONSTANT:exp
                         {:
                             List<String> expList = new ArrayList<>();
                             expList.add(exp.toString());
+                            String value = exp.toString();
+                            SymbolTableGenerator.addConstant(value, "float", value);
                             nfloat_expression_list=NodoSintactico.crearNodo("IF",
                             NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(exp),NodoSintactico.crearHoja("0")),
                             NodoSintactico.crearNodo("S",
@@ -298,6 +304,8 @@ float_expression_list ::= FLOAT_CONSTANT:exp COMMA float_expression_list:list
                         {:
                             List<String> expList = (List<String>) list;
                             expList.add(exp.toString());
+                            String value = exp.toString();
+                            SymbolTableGenerator.addConstant(value, "float", value);
                             nfloat_expression_list=NodoSintactico.crearNodo(";",nfloat_expression_list,
                             NodoSintactico.crearNodo("IF",
                             NodoSintactico.crearNodo("<",NodoSintactico.crearHoja(exp),NodoSintactico.crearHoja("0")),

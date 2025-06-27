@@ -17,7 +17,7 @@ public class AsmCodeGenerator implements FileGenerator {
     private final List<String> constantesString = new ArrayList<>();
     private final List<String> etiquetasString = new ArrayList<>();
     private static final List<NodoSintactico> arboles = new ArrayList<>();
-
+    private static int contadorAsignacionesString = 0;
     public void addTree(NodoSintactico root) {
         if (root != null) {
             arboles.add(root);
@@ -59,7 +59,9 @@ public class AsmCodeGenerator implements FileGenerator {
         fileWriter.write( "    mov ax,@data"+ "\n");
         fileWriter.write( "    mov ds,ax"+ "\n");
         for (String instr : instruccionesAssembler) {
-            fileWriter.write("    " + instr + "\n");
+            if(!instr.equals("_cte0 dd 0.0")) {
+                fileWriter.write("    " + instr + "\n");
+            }
         }
 
         fileWriter.write("\n    mov ax, 4C00h\n");
@@ -109,6 +111,9 @@ public class AsmCodeGenerator implements FileGenerator {
                 recorrerYGenerarAssembler(nodo.getDerecho());
                 break;
 
+            case "READ":
+                generarRead(nodo);
+                break;
             case "NEGATIVE_CALCULATION":
                 generarNegativeCalculation(nodo);
                 break;
@@ -118,6 +123,28 @@ public class AsmCodeGenerator implements FileGenerator {
     private void generarNegativeCalculation(NodoSintactico nodo) {
         recorrerYGenerarAssembler(nodo.getIzquierdo());
         recorrerYGenerarAssembler(nodo.getDerecho());
+    }
+
+    private void generarRead(NodoSintactico nodo) {
+        NodoSintactico arg = nodo.getIzquierdo();
+        if (arg == null) return;
+        String valor = arg.getValor();
+
+        if (SymbolTableGenerator.getTipo(valor).equals("string"))
+        {
+            instruccionesAssembler.add("getString "+valor);
+        }
+        else if (SymbolTableGenerator.getTipo(valor).equals("float"))
+        {
+            instruccionesAssembler.add("GetFloat "+valor);
+        }
+        else {
+            instruccionesAssembler.add("GetFloat "+valor);
+            instruccionesAssembler.add("FLD "+valor);
+            instruccionesAssembler.add("FRNDINT ");
+            instruccionesAssembler.add("FSTP "+valor);
+        }
+
     }
 
     private void generarWrite(NodoSintactico nodo) {
@@ -139,20 +166,53 @@ public class AsmCodeGenerator implements FileGenerator {
         NodoSintactico lhs = nodo.getIzquierdo();
         NodoSintactico rhs = nodo.getDerecho();
         if (lhs == null || rhs == null) return;
-        generarExpresion(rhs);
-        instruccionesAssembler.add("FSTP " + lhs.getValor());
+
+        String tipoLhs = SymbolTableGenerator.getTipo(lhs.getValor());
+        if ("string".equals(tipoLhs)) {
+            generarAsignacionString(lhs, rhs);
+        } else {
+            generarExpresion(rhs);
+            instruccionesAssembler.add("FSTP " + lhs.getValor());
+        }
     }
+    private void generarAsignacionString(NodoSintactico lhs, NodoSintactico rhs) {
+        String destino = lhs.getValor();
+        String source = rhs.getValor();
+
+        if (SymbolTableGenerator.tablaStrings.containsKey(source)) {
+            source = SymbolTableGenerator.tablaStrings.get(source);
+        }
+
+        String etiquetaLoop = "copy_string_loop_" + contadorAsignacionesString++;
+
+        instruccionesAssembler.add("; Asignación de string " + source + " a " + destino);
+        instruccionesAssembler.add("lea si, " + source);
+        instruccionesAssembler.add("lea di, " + destino);
+        instruccionesAssembler.add(etiquetaLoop + ":");
+        instruccionesAssembler.add("lodsb");
+        instruccionesAssembler.add("stosb");
+        instruccionesAssembler.add("cmp al, '$'");
+        instruccionesAssembler.add("jne " + etiquetaLoop);
+    }
+
+
 
     private void generarAsignacionSimple(NodoSintactico nodo) {
         String lhs = nodo.getIzquierdo().getValor();
-        String rhs = nodo.getDerecho().getValor();
-        if (esNumero(rhs)) {
-            instruccionesAssembler.add("mov ax, " + rhs);
-        } else {
-            instruccionesAssembler.add("mov ax, [" + rhs + "]");
+        String etiqueta = nodo.getDerecho().getValor();
+        boolean esNegativo = false;
+        if (esNumero(etiqueta)) {
+            if(etiqueta.contains("-"))
+            {
+                etiqueta = etiqueta.substring(etiqueta.indexOf("-")+1);
+                esNegativo = true;
+            }
         }
-        instruccionesAssembler.add("mov [" + lhs + "], ax");
+        instruccionesAssembler.add("FLD " + (esNumero(etiqueta) ? (etiqueta.contains(".")?(esNegativo?"_ctefm":"_ctef") + etiqueta.substring(0, etiqueta.indexOf(".")):(esNegativo?"_ctem":"_cte") + etiqueta) : etiqueta));
+        // Asignarlo a lhs (también float)
+        instruccionesAssembler.add("FSTP " + lhs);
     }
+
 
     private void generarExpresion(NodoSintactico nodo) {
         if (nodo == null) return;
@@ -185,7 +245,39 @@ public class AsmCodeGenerator implements FileGenerator {
                 break;
 
             default:
-                    instruccionesAssembler.add("FLD " + (esNumero(etiqueta) ? (etiqueta.contains(".")?"_ctef" + etiqueta.substring(0, etiqueta.indexOf(".")):"_cte" + etiqueta) : etiqueta));
+                boolean esNegativo = false;
+                String rawEtiqueta = etiqueta;
+
+
+                if (esNumero(rawEtiqueta)) {
+
+                    if (rawEtiqueta.startsWith("-")) {
+                        esNegativo = true;
+                        rawEtiqueta = rawEtiqueta.substring(1);
+                    }
+
+
+                    if (rawEtiqueta.contains(".")) {
+                        String suf = rawEtiqueta.replace(".", "dot");
+                        etiqueta = (esNegativo ? "_ctefm" : "_ctef") + suf;
+                    }
+                    // Si no contiene punto, es entero → _cte / _ctem + número
+                    else {
+                        etiqueta = (esNegativo ? "_ctem" : "_cte") + rawEtiqueta;
+                    }
+                }
+
+                else {
+                    String mapped = SymbolTableGenerator.tablaStrings.get(rawEtiqueta);
+                    if (mapped != null) {
+                        etiqueta = mapped;
+                    }
+                }
+
+
+                instruccionesAssembler.add("FLD " + etiqueta);
+
+
         }
     }
     private void generarWhile(NodoSintactico nodo) {
@@ -386,7 +478,7 @@ public class AsmCodeGenerator implements FileGenerator {
     private void extraerExpresionesNodo(NodoSintactico nodo, List<NodoSintactico> lista) {
         if (nodo == null) return;
 
-        if (".".equals(nodo.getValor()) || ",".equals(nodo.getValor())) {
+        if (".".equals(nodo.getValor()) || ",".equals(nodo.getValor()) || "PARAMS".equals(nodo.getValor())) {
             extraerExpresionesNodo(nodo.getIzquierdo(), lista);
             extraerExpresionesNodo(nodo.getDerecho(), lista);
         } else {
