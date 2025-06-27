@@ -1,5 +1,6 @@
 package lyc.compiler.TreeParser;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -73,4 +74,27 @@ public class NodoSintactico {
         return this.izquierdo == null && this.derecho == null;
     }
 
+    public static List<NodoSintactico> procesarListaExpresiones(NodoSintactico nodo) {
+        List<NodoSintactico> lista = new ArrayList<>();
+        while (nodo != null) {
+            if (nodo.getValor().equals(",")) {
+                lista.add(nodo.getIzquierdo());
+                nodo = nodo.getDerecho();
+            } else {
+                lista.add(nodo);
+                break;
+            }
+        }
+        return lista;
+    }
+
+    public static String imprimirExpresion(NodoSintactico nodo) {
+        if (nodo == null) return "";
+        if (nodo.esHoja()) return nodo.getValor();
+
+        String izq = imprimirExpresion(nodo.getIzquierdo());
+        String der = imprimirExpresion(nodo.getDerecho());
+
+        return "(" + izq + " " + nodo.getValor() + " " + der + ")";
+    }
 }
