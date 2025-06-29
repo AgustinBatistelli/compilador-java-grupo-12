@@ -67,6 +67,12 @@ include number.asm
     _cte75 dd 75.0
     
     
+    x dd ?
+    r dd ?
+    j dd ?
+    y dd ?
+    z dd ?
+    _cte9 dd 9.0
     _ctef4dot1 dd 4.1
     _ctefm1dot5 dd -1.5
     _ctef3dot0 dd 3.0
@@ -438,6 +444,86 @@ start:
     FSTP varInt12
     JMP WHILE_START2
     WHILE_END2:
+    FLD _cte9
+    FLD x
+    FSUB
+    
+    FLD _cte1
+    FLD _cte1
+    FADD
+    
+    FLD x
+    FLD _cte3
+    FADD
+    
+    FLD r
+    FLD j
+    FMUL
+    FLD _cte2
+    FSUB
+    
+    FLD x
+    FLD _cte3
+    FADD
+    
+    FLD _cte1
+    FLD _cte1
+    FADD
+    
+    FLD _cte9
+    FLD x
+    FSUB
+    
+    FLD r
+    FLD j
+    FMUL
+    FLD _cte2
+    FSUB
+    
+    FLD x
+    FLD _cte3
+    FADD
+    
+    FLD _cte1
+    FLD _cte1
+    FADD
+    
+    FLD _cte9
+    FLD x
+    FSUB
+    
+    FLD r
+    FLD j
+    FMUL
+    FLD _cte2
+    FSUB
+    
+    FLD x
+    FLD _cte3
+    FADD
+    
+    FLD _cte1
+    FLD _cte1
+    FADD
+    
+    FLD _cte9
+    FLD x
+    FSUB
+    
+    FLD _cte9
+    FLD _cte4
+    FSUB
+    
+    FLD _cte5
+    FLD _cte5
+    FADD
+    
+    FLD x
+    
+    FLD y
+    
+    FLD z
+    
     FLD _ctef4dot1
     FSTP varFloat1
     FLD _ctefm1dot5

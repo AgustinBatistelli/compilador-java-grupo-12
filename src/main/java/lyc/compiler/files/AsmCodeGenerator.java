@@ -159,7 +159,7 @@ public class AsmCodeGenerator implements FileGenerator {
             instruccionesAssembler.add("DisplayFloat "+valor +", 2");
         }
 
-        instruccionesAssembler.add(""); // Línea vacía para legibilidad
+        instruccionesAssembler.add("");
     }
 
     public void generarInstrucciones(NodoSintactico nodo) {
@@ -209,7 +209,6 @@ public class AsmCodeGenerator implements FileGenerator {
             }
         }
         instruccionesAssembler.add("FLD " + (esNumero(etiqueta) ? (etiqueta.contains(".")?(esNegativo?"_ctefm":"_ctef") + etiqueta.substring(0, etiqueta.indexOf(".")):(esNegativo?"_ctem":"_cte") + etiqueta) : etiqueta));
-        // Asignarlo a lhs (también float)
         instruccionesAssembler.add("FSTP " + lhs);
     }
 
@@ -261,7 +260,6 @@ public class AsmCodeGenerator implements FileGenerator {
                         String suf = rawEtiqueta.replace(".", "dot");
                         etiqueta = (esNegativo ? "_ctefm" : "_ctef") + suf;
                     }
-                    // Si no contiene punto, es entero → _cte / _ctem + número
                     else {
                         etiqueta = (esNegativo ? "_ctem" : "_cte") + rawEtiqueta;
                     }

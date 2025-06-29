@@ -177,6 +177,30 @@ while varInt12 < 10
 }
 */
 
+#+ TEST PARA LA FUNCIÓN REORDER +#
+init {
+  x, r, j, y,z : Int
+}
+
+reorder([x+3, 1+1, 9-x], 1, 2) #+ Caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 2) #+ Caso bien escrito +#
+reorder([r*j-2, x+3, 1+1, 9-x], 0, 3) #+ Caso donde no reordena porque no hay nada a la derecha (pero es válido sintácticamente) +#
+reorder([r*j-2, x+3, 1+1, 9-x], 1, 0) #+ Caso donde no reordena porque no hay nada a la izquierda (pero es válido sintácticamente) +#
+reorder([5+5, 2*3, 9-4], 1, 1) #+ Caso válido invirtiendo elementos +#
+reorder([x, y, z], 0, 2) #+ Caso válido reordenando extremos +#
+
+#+ TESTS FALLIDOS PARA REORDER (eliminar los caracteres de apertura y cierre de bloque de codigo "/*" y "*/") +#
+/*
+reorder([x+3, 1+1, 9-x], 2, 2) #+ Error: valor booleano no es 0 o 1 +#
+reorder(x+3, 1+1, 9-x, 1, 2) #+ Error: falta corchetes +#
+reorder([x+3, 1+1, 9-x], 1, 2.5) #+ Error: el pivote no es un entero +#
+reorder([], 1, 0) #+ Error: lista vacía +#
+reorder([x+3, 1+1, 9-x], 1) #+ Error: falta parámetro pivote +#
+reorder([5+5, 2*3, 9-4], -1, 1) #+ Error: índice negativo +#
+reorder([5+5, 2*3, 9-4], 1, 5) #+ Error: índice fuera de rango +#
+*/
+
+
 #+ TEST PARA LA FUNCIÓN NegativeCalculation +#
 varFloat1 := 4.1
 varFloat2 := -1.5

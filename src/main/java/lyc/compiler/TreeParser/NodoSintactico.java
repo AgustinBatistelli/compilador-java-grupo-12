@@ -40,36 +40,6 @@ public class NodoSintactico {
         return derecho;
     }
 
-    public void setIzquierdo(NodoSintactico izq) {
-        this.izquierdo = izq;
-    }
-
-    public void setDerecho(NodoSintactico der) {
-        this.derecho = der;
-    }
-
-    public static NodoSintactico createBalancedTreeIterative(List<String> list) {
-        if (list.isEmpty()) return null;
-
-        Queue<NodoSintactico> queue = new LinkedList<>();
-        for (String s : list) {
-            queue.add(new NodoSintactico(s));
-        }
-
-        while (queue.size() > 1) {
-            NodoSintactico left = queue.poll();
-            NodoSintactico right = queue.poll();
-
-            NodoSintactico parent = new NodoSintactico(",");
-            parent.setIzquierdo(left);
-            parent.setDerecho(right);
-
-            queue.add(parent);
-        }
-
-        return queue.poll();
-    }
-
     public boolean esHoja() {
         return this.izquierdo == null && this.derecho == null;
     }
